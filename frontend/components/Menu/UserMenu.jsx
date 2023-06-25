@@ -2,9 +2,12 @@ import { AiOutlineMenu } from 'react-icons/ai';
 import Avatar from '../UIhelpers/Avatar';
 import { useCallback, useState } from 'react';
 import MenuItem from './MenuItem';
+import { useDispatch } from 'react-redux';
+import { uiActions } from '../../store/ui-slice';
 
 const UserMenu = () => {
 	const [isOpen, setIsOpen] = useState(false);
+	const dispatch = useDispatch();
 
 	const toggleOpen = useCallback(() => {
 		setIsOpen(!isOpen);
@@ -30,11 +33,17 @@ const UserMenu = () => {
 				<div className='absolute right-0 top-12 w-[40vw] overflow-hidden rounded-xl bg-white text-sm shadow-md md:w-3/4'>
 					<div className='flex cursor-pointer flex-col'>
 						<MenuItem
-							onClick={() => {}}
+							onClick={() => {
+								dispatch(uiActions.showLoginModal());
+								toggleOpen();
+							}}
 							label='Login'
 						/>
 						<MenuItem
-							onClick={() => {}}
+							onClick={() => {
+								dispatch(uiActions.showRegisterModal());
+								toggleOpen();
+							}}
 							label='Sign up'
 						/>
 					</div>
