@@ -46,7 +46,7 @@ const LoginModal = () => {
 					avatar,
 				})
 			);
-			// set cookie token
+			localStorage.setItem('auth_token', token);
 		}
 	};
 
