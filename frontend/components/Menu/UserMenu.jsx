@@ -2,10 +2,12 @@ import { AiOutlineMenu } from 'react-icons/ai';
 import Avatar from '../UIhelpers/Avatar';
 import { useCallback, useState } from 'react';
 import MenuItem from './MenuItem';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { uiActions } from '../../store/ui-slice';
+import { userActions } from '../../store/user-slice';
 
 const UserMenu = () => {
+	const user = useSelector((state) => state.user);
 	const [isOpen, setIsOpen] = useState(false);
 	const dispatch = useDispatch();
 
@@ -31,22 +33,56 @@ const UserMenu = () => {
 			</div>
 			{isOpen && (
 				<div className='absolute right-0 top-12 w-[40vw] overflow-hidden rounded-xl bg-white text-sm shadow-md md:w-3/4'>
-					<div className='flex cursor-pointer flex-col'>
-						<MenuItem
-							onClick={() => {
-								dispatch(uiActions.showLoginModal());
-								toggleOpen();
-							}}
-							label='Login'
-						/>
-						<MenuItem
-							onClick={() => {
-								dispatch(uiActions.showRegisterModal());
-								toggleOpen();
-							}}
-							label='Sign up'
-						/>
-					</div>
+					{user.loggedIn && (
+						<div className='flex cursor-pointer flex-col'>
+							<MenuItem
+								onClick={() => {
+									toggleOpen();
+								}}
+								label='1'
+							/>
+							<MenuItem
+								onClick={() => {
+									toggleOpen();
+								}}
+								label='2'
+							/>
+							<MenuItem
+								onClick={() => {
+									toggleOpen();
+								}}
+								label='3'
+							/>
+							<hr />
+							<MenuItem
+								onClick={() => {
+									localStorage.removeItem('auth_token');
+									dispatch(userActions.logoutUser());
+									toggleOpen();
+								}}
+								label='Log out'
+							/>
+						</div>
+					)}
+
+					{!user.loggedIn && (
+						<div className='flex cursor-pointer flex-col'>
+							<MenuItem
+								onClick={() => {
+									dispatch(uiActions.showLoginModal());
+									toggleOpen();
+								}}
+								label='Login'
+							/>
+							<MenuItem
+								onClick={() => {
+									dispatch(uiActions.showRegisterModal());
+									toggleOpen();
+								}}
+								label='Sign up'
+							/>
+						</div>
+					)}
 				</div>
 			)}
 		</div>
