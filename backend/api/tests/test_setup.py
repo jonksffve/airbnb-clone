@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 class TestSetUp(APITestCase):
     def setUp(self):
         self.endpoint = "/api/account/"
-        self.auth_endpoint = "/api/account/auth/"
+        self.auth_endpoint = "/api/auth/token_auth/"
 
         self.user_model = get_user_model()
         self.user_object = self.user_model.objects.create_user(

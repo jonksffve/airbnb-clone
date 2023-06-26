@@ -53,3 +53,16 @@ class AccountTests(TestSetUp):
                          self.user_object.last_name)
         self.assertEqual(response.data['email'],
                          self.user_object.email)
+
+    def test_can_get_user(self):
+        """
+        Ensure we can get user information
+        """
+        response = self.client.get(f"{self.endpoint}normal@user.com/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['first_name'],
+                         self.user_object.first_name)
+        self.assertEqual(response.data['last_name'],
+                         self.user_object.last_name)
+        self.assertEqual(response.data['email'],
+                         self.user_object.email)
