@@ -8,7 +8,7 @@ import Input from '../UIhelpers/Inputs/Input';
 import Button from '../UIhelpers/Button';
 import { FcGoogle } from 'react-icons/fc';
 import { AiFillGithub } from 'react-icons/ai';
-import { registerAPI } from '../../api/AuthAPI';
+import { registerUserAPI } from '../../api/AuthAPI';
 
 const RegisterModal = () => {
 	const uiState = useSelector((state) => state.ui);
@@ -18,10 +18,13 @@ const RegisterModal = () => {
 	const {
 		register,
 		handleSubmit,
+		reset,
+		setError,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
-			name: '',
+			first_name: '',
+			last_name: '',
 			email: '',
 			password: '',
 		},
@@ -29,12 +32,24 @@ const RegisterModal = () => {
 
 	const onSubmit = async (data) => {
 		setIsLoading(true);
-		await registerAPI(data, setIsLoading);
+		const response = await registerUserAPI(data, setIsLoading);
+
+		if (response.status === 400) {
+			const errors = Object.entries(response.data);
+			for (const [key, value] of errors) {
+				setError(key, { type: 'custom', message: [...value] });
+			}
+		}
+
+		if (response.status === 201) {
+			handleClose();
+		}
 	};
 
 	const handleClose = useCallback(() => {
 		dispatch(uiActions.closeRegisterModal());
-	}, [dispatch]);
+		reset();
+	}, [dispatch, reset]);
 
 	const bodyContent = (
 		<div className='flex flex-col gap-4'>
@@ -45,14 +60,23 @@ const RegisterModal = () => {
 			<Input
 				id='email'
 				label='Email'
+				type='email'
 				disabled={isLoading}
 				register={register}
 				errors={errors}
 				required
 			/>
 			<Input
-				id='name'
-				label='Name'
+				id='first_name'
+				label='First name'
+				disabled={isLoading}
+				register={register}
+				errors={errors}
+				required
+			/>
+			<Input
+				id='last_name'
+				label='Last name'
 				disabled={isLoading}
 				register={register}
 				errors={errors}
