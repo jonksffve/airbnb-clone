@@ -10,6 +10,12 @@ class TestSetUp(APITestCase):
         self.user_model = get_user_model()
         self.user_object = self.user_model.objects.create_user(
             email="normal@user.com", password="foo123", first_name="Test", last_name="Prueba")
+        response = self.client.post(self.auth_endpoint, {
+            'username': 'normal@user.com',
+            'password': 'foo123'
+        })
+
+        self.authenticated_user = response.data
 
         self.user_data_valid = {
             'first_name': 'Testing',
