@@ -33,8 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     date_joined = models.DateTimeField(
         _("date joined"), auto_now_add=True, blank=False, null=False)
-    avatar = models.ImageField(_("user avatar"), upload_to="avatar/", height_field=None,
-                               width_field=None, max_length=None, blank=True, null=True)
+    avatar = models.ImageField(
+        _("user avatar"), upload_to="avatar/", default='default.jpg')
 
     objects = UserManager()
 
