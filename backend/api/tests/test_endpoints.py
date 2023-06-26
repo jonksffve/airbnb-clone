@@ -32,3 +32,11 @@ class AccountTests(TestSetUp):
         self.assertEqual(User.objects.get().first_name, 'Testing')
         self.assertEqual(User.objects.get().get_full_name(),
                          'Testing Endpoints')
+
+    def test_methods_endpoint(self):
+        """
+        Ensure we can only use the right method.
+        """
+        response = self.client.get(self.endpoint)
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
