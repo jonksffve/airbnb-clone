@@ -32,3 +32,13 @@ export const getAuthorizationAPI = async (data, setIsLoading) => {
 		setIsLoading(false);
 	}
 };
+
+export const getUserInformationAPI = async (token) => {
+	try {
+		const response = await axios.get(`${ENDPOINT_ACCOUNT}${token}/`);
+		return response;
+	} catch (error) {
+		toast.error('Please check credentials.', toastOptions);
+		return error.response;
+	}
+};
