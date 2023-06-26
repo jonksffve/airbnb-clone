@@ -1,5 +1,5 @@
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from accounts.serializers import UserSerializer
+from accounts.serializers import UserSerializer, TokenSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth import get_user_model
@@ -31,6 +31,6 @@ class CustomAuthToken(ObtainAuthToken):
 
 
 class RetrieveUserInformation(RetrieveAPIView):
-    queryset = user_model.objects.all()
-    serializer_class = UserSerializer
-    lookup_field = 'email'
+    queryset = Token.objects.all()
+    serializer_class = TokenSerializer
+    lookup_field = 'key'
