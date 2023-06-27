@@ -103,14 +103,17 @@ const LoginModal = () => {
 			text-neutral-500'
 			>
 				<div className='flex flex-row items-center justify-center gap-2'>
-					<div>Forgot your details?</div>
+					<div>First time in Airbnb?</div>
 					<div
-						onClick={() => {}}
+						onClick={() => {
+							dispatch(uiActions.closeLoginModal());
+							dispatch(uiActions.showRegisterModal());
+						}}
 						className='cursor-pointer
 					text-neutral-800
 					hover:underline'
 					>
-						Recover
+						Register
 					</div>
 				</div>
 			</div>
