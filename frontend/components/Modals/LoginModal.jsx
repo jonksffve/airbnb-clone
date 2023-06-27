@@ -33,17 +33,16 @@ const LoginModal = () => {
 		const response = await getAuthorizationAPI(data, setIsLoading);
 
 		if (response.status === 200) {
-			const { token, userID, first_name, last_name, email, avatar } =
-				response.data;
+			const { token, user } = response.data;
 			handleClose();
 			dispatch(
 				userActions.loginUser({
-					token,
-					userID,
-					first_name,
-					last_name,
-					email,
-					avatar,
+					token: token,
+					userID: user.id,
+					first_name: user.first_name,
+					last_name: user.last_name,
+					email: user.email,
+					avatar: user.avatar,
 				})
 			);
 			localStorage.setItem('auth_token', token);
