@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
 	showRegisterModal: false,
 	showLoginModal: false,
+	showRentModal: false,
 };
 
 const uiSlice = createSlice({
@@ -20,6 +21,12 @@ const uiSlice = createSlice({
 		},
 		closeLoginModal: (state) => {
 			state.showLoginModal = false;
+		},
+		showRentModal: (state) => {
+			state.showRentModal = true;
+		},
+		closeRentModal: (state) => {
+			state.showRentModal = false;
 		},
 	},
 });

@@ -6,6 +6,7 @@ import LoginModal from '../../../components/Modals/LoginModal';
 import { getUserInformationAPI } from '../../../api/AuthAPI';
 import { useDispatch } from 'react-redux';
 import { userActions } from '../../../store/user-slice';
+import RentModal from '../../../components/Modals/RentModal';
 
 const RootLayout = () => {
 	const dispatch = useDispatch();
@@ -42,6 +43,7 @@ const RootLayout = () => {
 			<main>
 				<Outlet />
 			</main>
+			<RentModal />
 			<RegisterModal />
 			<LoginModal />
 		</Fragment>
