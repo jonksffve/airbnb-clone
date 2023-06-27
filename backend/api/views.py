@@ -14,19 +14,18 @@ class UserCreationView(CreateAPIView):
 
 
 class CustomAuthToken(ObtainAuthToken):
+    queryset = TokenSerializer
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
+        serializer = UserSerializer(user, context={'request': request})
         return Response({
             'token': token.key,
-            'userID': user.pk,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
-            'avatar': user.avatar.url,
+            'user': serializer.data
         })
 
 
