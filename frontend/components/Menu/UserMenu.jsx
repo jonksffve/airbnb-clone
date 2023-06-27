@@ -15,10 +15,17 @@ const UserMenu = () => {
 		setIsOpen(!isOpen);
 	}, [isOpen]);
 
+	const onRent = useCallback(() => {
+		if (!user.loggedIn) return dispatch(uiActions.showLoginModal());
+	}, [dispatch, user.loggedIn]);
+
 	return (
 		<div className='relative'>
 			<div className='flex flex-row items-center gap-3'>
-				<div className='hidden cursor-pointer rounded-full px-4 py-3 text-sm font-semibold transition hover:bg-neutral-100 md:block'>
+				<div
+					onClick={onRent}
+					className='hidden cursor-pointer rounded-full px-4 py-3 text-sm font-semibold transition hover:bg-neutral-100 md:block'
+				>
 					Air your home
 				</div>
 				<div
