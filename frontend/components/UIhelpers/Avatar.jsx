@@ -1,10 +1,10 @@
 import AvatarImg from '../../src/assets/images/placeholder.jpg';
 
-const Avatar = () => {
+const Avatar = ({ avatar }) => {
 	return (
 		<img
 			className='rounded-full'
-			src={AvatarImg}
+			src={avatar || AvatarImg}
 			alt=''
 			height={30}
 			width={30}

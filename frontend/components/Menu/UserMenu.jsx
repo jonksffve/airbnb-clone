@@ -27,7 +27,7 @@ const UserMenu = () => {
 				>
 					<AiOutlineMenu />
 					<div className='hidden md:block'>
-						<Avatar />
+						<Avatar avatar={user.avatar} />
 					</div>
 				</div>
 			</div>
@@ -39,19 +39,31 @@ const UserMenu = () => {
 								onClick={() => {
 									toggleOpen();
 								}}
-								label='1'
+								label='My trips'
 							/>
 							<MenuItem
 								onClick={() => {
 									toggleOpen();
 								}}
-								label='2'
+								label='My favorites'
 							/>
 							<MenuItem
 								onClick={() => {
 									toggleOpen();
 								}}
-								label='3'
+								label='My reservations'
+							/>
+							<MenuItem
+								onClick={() => {
+									toggleOpen();
+								}}
+								label='My properties'
+							/>
+							<MenuItem
+								onClick={() => {
+									toggleOpen();
+								}}
+								label='Airbnb my home'
 							/>
 							<hr />
 							<MenuItem
