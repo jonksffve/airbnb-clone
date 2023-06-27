@@ -17,6 +17,8 @@ const UserMenu = () => {
 
 	const onRent = useCallback(() => {
 		if (!user.loggedIn) return dispatch(uiActions.showLoginModal());
+
+		dispatch(uiActions.showRentModal());
 	}, [dispatch, user.loggedIn]);
 
 	return (
@@ -69,6 +71,7 @@ const UserMenu = () => {
 							<MenuItem
 								onClick={() => {
 									toggleOpen();
+									onRent();
 								}}
 								label='Airbnb my home'
 							/>
