@@ -24,6 +24,7 @@ const STEPS = {
 };
 
 const RentModal = () => {
+	const userState = useSelector((state) => state.user);
 	const uiState = useSelector((state) => state.ui);
 	const dispatch = useDispatch();
 	const [step, setStep] = useState(STEPS.CATEGORY);
@@ -76,7 +77,11 @@ const RentModal = () => {
 	const onSubmit = async (data) => {
 		if (step !== STEPS.PRICE) return onNext();
 		setIsLoading(true);
-		const response = await createListingAPI(data, setIsLoading);
+		const response = await createListingAPI(
+			data,
+			setIsLoading,
+			userState.token
+		);
 
 		if (response.status === 201) {
 			reset();

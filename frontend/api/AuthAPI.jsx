@@ -39,7 +39,11 @@ export const getAuthorizationAPI = async (data, setIsLoading) => {
 
 export const getUserInformationAPI = async (token) => {
 	try {
-		const response = await axios.get(`${ENDPOINT_ACCOUNT}${token}/`);
+		const response = await axios.get(`${ENDPOINT_ACCOUNT}${token}/`, {
+			headers: {
+				Authorization: `Token ${token}`,
+			},
+		});
 		return response;
 	} catch (error) {
 		toast.error('Please check credentials.', toastOptions);
@@ -47,12 +51,13 @@ export const getUserInformationAPI = async (token) => {
 	}
 };
 
-export const createListingAPI = async (data, setIsLoading) => {
+export const createListingAPI = async (data, setIsLoading, token) => {
 	try {
 		const response = await axios.postForm(ENDPOINT_LISTING, data, {
 			withCredentials: false,
 			headers: {
 				'content-type': 'multipart/form-data',
+				Authorization: `Token ${token}`,
 			},
 		});
 		toast.success('Listing created!', toastOptions);
