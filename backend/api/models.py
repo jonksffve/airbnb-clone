@@ -6,6 +6,10 @@ from django.core.validators import MinValueValidator
 class Category(models.Model):
     name = models.CharField(_("Category"), max_length=50)
 
+    class Meta:
+        verbose_name = _("Category")
+        verbose_name_plural = _("Categories")
+
     def __str__(self):
         return self.name
 
@@ -28,6 +32,10 @@ class Listing(models.Model):
         "Category"), on_delete=models.CASCADE, blank=False, null=False)
     location = models.CharField(
         _("Location"), max_length=50, blank=False, null=False)
+
+    class Meta:
+        verbose_name = "Listing"
+        verbose_name_plural = "Listings"
 
     def __str__(self):
         return self.title
