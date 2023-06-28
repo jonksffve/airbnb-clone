@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, ValidationError, DecimalField
+from rest_framework.serializers import ModelSerializer
 from .models import Listing, Category
 
 
