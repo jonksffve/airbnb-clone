@@ -8,6 +8,7 @@ const CountrySelect = ({ onSelect, value }) => {
 	return (
 		<Select
 			placeholder='Select anywhere in the world!'
+			showSearch
 			value={value}
 			onChange={(value) => {
 				onSelect(value);

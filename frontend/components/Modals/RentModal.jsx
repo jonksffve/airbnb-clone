@@ -11,6 +11,8 @@ import MapDisplay from '../MapDisplay';
 import BasicDetail from '../UIhelpers/Inputs/BasicDetail';
 import ImagesUploadInput from '../UIhelpers/Inputs/ImagesUploadInput';
 import Input from '../UIhelpers/Inputs/Input';
+import { createListingAPI } from '../../api/AuthAPI';
+import Spinner from '../UIhelpers/Spinner';
 
 const STEPS = {
 	CATEGORY: 0,
@@ -36,15 +38,15 @@ const RentModal = () => {
 		reset,
 	} = useForm({
 		defaultValues: {
-			category: '',
+			category: null,
 			location: null,
 			guestCount: 1,
 			roomCount: 1,
 			bathroomCount: 1,
-			imageSrc: '',
+			image: null,
 			price: 1,
-			title: '',
-			description: '',
+			title: null,
+			description: null,
 		},
 	});
 
@@ -53,7 +55,7 @@ const RentModal = () => {
 	const guestCount = watch('guestCount');
 	const roomCount = watch('roomCount');
 	const bathroomCount = watch('bathroomCount');
-	const imageSrc = watch('imageSrc');
+	const image = watch('image');
 
 	const setCustomValue = (id, value) => {
 		setValue(id, value, {
@@ -71,12 +73,18 @@ const RentModal = () => {
 		setStep((value) => value + 1);
 	};
 
-	const onSubmit = (data) => {
+	const onSubmit = async (data) => {
 		if (step !== STEPS.PRICE) return onNext();
 		setIsLoading(true);
+		const response = await createListingAPI(data, setIsLoading);
 
-		//API CALL TO UPLOAD WHOLE FORM! LISTINGs!
-		console.log(data);
+		if (response.status === 201) {
+			reset();
+			dispatch(uiActions.closeRentModal());
+			setStep(STEPS.CATEGORY);
+		}
+
+		setIsLoading(false);
 	};
 
 	const handleClose = () => {
@@ -187,8 +195,8 @@ const RentModal = () => {
 					subtitle='Pick images that best describe your place'
 				/>
 				<ImagesUploadInput
-					value={imageSrc}
-					onChange={(value) => setCustomValue('imageSrc', value)}
+					value={image}
+					onChange={(value) => setCustomValue('image', value)}
 				/>
 			</div>
 		);
@@ -243,7 +251,13 @@ const RentModal = () => {
 		);
 	}
 
-	const footerContent = '';
+	if (isLoading) {
+		bodyContent = (
+			<div className='flex cursor-not-allowed flex-col gap-8'>
+				<Spinner />
+			</div>
+		);
+	}
 
 	return (
 		<Modal
@@ -252,7 +266,6 @@ const RentModal = () => {
 			onSubmit={handleSubmit(onSubmit)}
 			title='Airbnb your home!'
 			body={bodyContent}
-			footer={footerContent}
 			actionLabel={actionLabel}
 			secondaryActionLabel={secondaryActionLabel}
 			secondaryAction={step === STEPS.CATEGORY ? undefined : onBack}
