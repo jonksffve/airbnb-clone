@@ -17,9 +17,9 @@ class TestSetUp(APITestCase):
             'password': 'foo123'
         })
 
-        self.cat = Category.objects.create(name='Castillo')
-
         self.authenticated_user = response.data
+
+        self.cat = Category.objects.create(name='Castillo')
 
         self.user_data_valid = {
             'first_name': 'Testing',

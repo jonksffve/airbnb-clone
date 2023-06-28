@@ -31,13 +31,42 @@ class AccountTests(TestSetUp):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(self.user_model.objects.count(), 1)
 
-    def test_methods_endpoint(self):
+    def test_responses_endpoint(self):
         """
-        Ensure we can only use the right method.
+        Ensure we can only use the right method or permission.
         """
+        # ---------- RIGHT METHOD ----------#
+        # CREATE USER VIEW SHOULD ONLY TAKE "POST"
         response = self.client.get(self.account_endpoint)
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        # CREATE LISTING VIEW SHOULD ONLY TAKE "POST"
+        response = self.client.get(
+            self.listing_endpoint, HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        # RETRIEVE USER INFORMATION VIEW SHOULD ONLY TAKE "GET"
+        response = self.client.post(
+            f'{self.account_endpoint}{self.authenticated_user["token"]}/', data={}, HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        # AUTHENTICATION VIA TOKEN SHOULD ONLY ACCEPT "POST"
+        response = self.client.get(self.auth_endpoint)
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        # ---------- PERMISSIONS ----------#
+        response = self.client.post(self.listing_endpoint, data={})
+        self.assertEqual(response.status_code,
+                         status.HTTP_401_UNAUTHORIZED)
+
+        response = self.client.get(
+            f'{self.account_endpoint}{self.authenticated_user["token"]}/')
+        self.assertEqual(response.status_code,
+                         status.HTTP_401_UNAUTHORIZED)
 
     def test_can_get_token(self):
         """
@@ -60,7 +89,7 @@ class AccountTests(TestSetUp):
         Ensure we can get user information
         """
         response = self.client.get(
-            f"{self.account_endpoint}{self.authenticated_user['token']}/")
+            f"{self.account_endpoint}{self.authenticated_user['token']}/", HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['user']['first_name'],
                          self.user_object.first_name)
@@ -73,89 +102,114 @@ class AccountTests(TestSetUp):
         """
         Ensure we can create Listing
         """
-        response = self.client.post(self.listing_endpoint, {
-                                    'title': 'I have title',
-                                    'description': 'This is my description',
-                                    'price': '25.50',
-                                    'guestCount': '2',
-                                    'roomCount': '3',
-                                    'bathroomCount': '2',
-                                    'category': 'Castillo',
-                                    'location': 'USA'}, format='json')
+        response = self.client.post(self.listing_endpoint,
+                                    data={
+                                        'title': 'I have title',
+                                        'description': 'This is my description',
+                                        'price': '25.50',
+                                        'guestCount': '2',
+                                        'roomCount': '3',
+                                        'bathroomCount': '2',
+                                        'category': 'Castillo',
+                                        'location': 'USA'},
+                                    format='json',
+                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}'
+                                    )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['title'], 'I have title')
         self.assertEqual(Listing.objects.count(), 1)
+        self.assertEqual(response.data['creator'],
+                         self.authenticated_user['user'])
 
     def test_can_not_create_listing(self):
         """
         Ensure we can not create Listing
         """
         # With empty title
-        response = self.client.post(self.listing_endpoint, {
-                                    'title': '',
-                                    'description': 'This is my description',
-                                    'price': '25.50',
-                                    'guestCount': '2',
-                                    'roomCount': '3',
-                                    'bathroomCount': '2',
-                                    'category': 'Castillo',
-                                    'location': 'USA'}, format='json')
+        response = self.client.post(self.listing_endpoint,
+                                    data={
+                                        'title': '',
+                                        'description': 'This is my description',
+                                        'price': '25.50',
+                                        'guestCount': '2',
+                                        'roomCount': '3',
+                                        'bathroomCount': '2',
+                                        'category': 'Castillo',
+                                        'location': 'USA'},
+                                    format='json',
+                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # with no title
-        response = self.client.post(self.listing_endpoint, {
-                                    'description': 'This is my description',
-                                    'price': '25.50',
-                                    'guestCount': '2',
-                                    'roomCount': '3',
-                                    'bathroomCount': '2',
-                                    'category': 'Castillo',
-                                    'location': 'USA'}, format='json')
+        response = self.client.post(self.listing_endpoint,
+                                    data={
+                                        'description': 'This is my description',
+                                        'price': '25.50',
+                                        'guestCount': '2',
+                                        'roomCount': '3',
+                                        'bathroomCount': '2',
+                                        'category': 'Castillo',
+                                        'location': 'USA'},
+                                    format='json',
+                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # with negative price?
-        response = self.client.post(self.listing_endpoint, {
-                                    'title': '',
-                                    'description': 'This is my description',
-                                    'price': '-1',
-                                    'guestCount': '2',
-                                    'roomCount': '3',
-                                    'bathroomCount': '2',
-                                    'category': 'Castillo',
-                                    'location': 'USA'}, format='json')
+        response = self.client.post(self.listing_endpoint,
+                                    data={
+                                        'title': '',
+                                        'description': 'This is my description',
+                                        'price': '-1',
+                                        'guestCount': '2',
+                                        'roomCount': '3',
+                                        'bathroomCount': '2',
+                                        'category': 'Castillo',
+                                        'location': 'USA'},
+                                    format='json',
+                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # IF category can't be found
-        response = self.client.post(self.listing_endpoint, {
-                                    'title': '',
-                                    'description': '',
-                                    'price': '0',
-                                    'guestCount': '0',
-                                    'roomCount': '0',
-                                    'bathroomCount': '0',
-                                    'category': 'Castillo1',
-                                    'location': ''}, format='json')
+        response = self.client.post(self.listing_endpoint,
+                                    data={
+                                        'title': '',
+                                        'description': '',
+                                        'price': '0',
+                                        'guestCount': '0',
+                                        'roomCount': '0',
+                                        'bathroomCount': '0',
+                                        'category': 'Castillo1',
+                                        'location': ''},
+                                    format='json',
+                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # With ALL fields wrong (except category which raises a dif status)
-        response = self.client.post(self.listing_endpoint, {
-                                    'title': '',
-                                    'description': '',
-                                    'price': '0',
-                                    'guestCount': '0',
-                                    'roomCount': '0',
-                                    'bathroomCount': '0',
-                                    'category': 'Castillo',
-                                    'location': ''}, format='json')
+        response = self.client.post(self.listing_endpoint,
+                                    data={
+                                        'title': '',
+                                        'description': '',
+                                        'price': '0',
+                                        'guestCount': '0',
+                                        'roomCount': '0',
+                                        'bathroomCount': '0',
+                                        'category': 'Castillo',
+                                        'location': ''},
+                                    format='json',
+                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # IF category is not defined
-        response = self.client.post(self.listing_endpoint, {
-                                    'title': '',
-                                    'description': '',
-                                    'price': '0',
-                                    'guestCount': '0',
-                                    'roomCount': '0',
-                                    'bathroomCount': '0',
-                                    'location': ''}, format='json')
+        response = self.client.post(self.listing_endpoint,
+                                    data={
+                                        'title': '',
+                                        'description': '',
+                                        'price': '0',
+                                        'guestCount': '0',
+                                        'roomCount': '0',
+                                        'bathroomCount': '0',
+                                        'location': ''},
+                                    format='json',
+                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}'
+                                    )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
