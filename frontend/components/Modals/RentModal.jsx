@@ -6,6 +6,8 @@ import Heading from './Heading';
 import { categories } from '../Menu/Categories';
 import CategoryInput from '../UIhelpers/Inputs/CategoryInput';
 import { useForm } from 'react-hook-form';
+import CountrySelect from '../UIhelpers/Inputs/CountrySelect';
+import MapDisplay from '../MapDisplay';
 
 const STEPS = {
 	CATEGORY: 0,
@@ -43,6 +45,7 @@ const RentModal = () => {
 	});
 
 	const category = watch('category');
+	const location = watch('location');
 
 	const setCustomValue = (id, value) => {
 		setValue(id, value, {
@@ -107,7 +110,21 @@ const RentModal = () => {
 	);
 
 	if (step === STEPS.LOCATION) {
-		bodyContent = <div>Location step!</div>;
+		bodyContent = (
+			<div className='flex flex-col gap-8'>
+				<Heading
+					title='Where is your place located?'
+					subtitle='Help guests find you!'
+				/>
+				<CountrySelect
+					onSelect={(location) => {
+						setCustomValue('location', location);
+					}}
+					value={location}
+				/>
+				<MapDisplay center={location?.latlng} />
+			</div>
+		);
 	}
 
 	const footerContent = '';
