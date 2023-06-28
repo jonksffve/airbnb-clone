@@ -9,6 +9,8 @@ import { useForm } from 'react-hook-form';
 import CountrySelect from '../UIhelpers/Inputs/CountrySelect';
 import MapDisplay from '../MapDisplay';
 import BasicDetail from '../UIhelpers/Inputs/BasicDetail';
+import ImagesUploadInput from '../UIhelpers/Inputs/ImagesUploadInput';
+import Input from '../UIhelpers/Inputs/Input';
 
 const STEPS = {
 	CATEGORY: 0,
@@ -23,6 +25,7 @@ const RentModal = () => {
 	const uiState = useSelector((state) => state.ui);
 	const dispatch = useDispatch();
 	const [step, setStep] = useState(STEPS.CATEGORY);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const {
 		register,
@@ -50,6 +53,7 @@ const RentModal = () => {
 	const guestCount = watch('guestCount');
 	const roomCount = watch('roomCount');
 	const bathroomCount = watch('bathroomCount');
+	const imageSrc = watch('imageSrc');
 
 	const setCustomValue = (id, value) => {
 		setValue(id, value, {
@@ -62,8 +66,17 @@ const RentModal = () => {
 	const onBack = () => {
 		setStep((value) => value - 1);
 	};
+
 	const onNext = () => {
 		setStep((value) => value + 1);
+	};
+
+	const onSubmit = (data) => {
+		if (step !== STEPS.PRICE) return onNext();
+		setIsLoading(true);
+
+		//API CALL TO UPLOAD WHOLE FORM! LISTINGs!
+		console.log(data);
 	};
 
 	const handleClose = () => {
@@ -166,13 +179,77 @@ const RentModal = () => {
 		);
 	}
 
+	if (step === STEPS.IMAGES) {
+		bodyContent = (
+			<div className='flex flex-col gap-8'>
+				<Heading
+					title='Upload your place images'
+					subtitle='Pick images that best describe your place'
+				/>
+				<ImagesUploadInput
+					value={imageSrc}
+					onChange={(value) => setCustomValue('imageSrc', value)}
+				/>
+			</div>
+		);
+	}
+
+	if (step === STEPS.DESCRIPTION) {
+		bodyContent = (
+			<div className='flex flex-col gap-8'>
+				<Heading
+					title='How would you describe your place?'
+					subtitle='Short and sweet is best!'
+				/>
+				<Input
+					id='title'
+					label='Title'
+					disabled={isLoading}
+					required
+					register={register}
+					errors={errors}
+				/>
+				<hr />
+				<Input
+					id='description'
+					label='Description'
+					disabled={isLoading}
+					required
+					register={register}
+					errors={errors}
+				/>
+			</div>
+		);
+	}
+
+	if (step === STEPS.PRICE) {
+		bodyContent = (
+			<div className='flex flex-col gap-8'>
+				<Heading
+					title='Now, set your price'
+					subtitle='How much do you charge per night?'
+				/>
+				<Input
+					id='price'
+					label='Price'
+					disabled={isLoading}
+					type='number'
+					formatPrice
+					required
+					register={register}
+					errors={errors}
+				/>
+			</div>
+		);
+	}
+
 	const footerContent = '';
 
 	return (
 		<Modal
 			isOpen={uiState.showRentModal}
 			onClose={handleClose}
-			onSubmit={onNext}
+			onSubmit={handleSubmit(onSubmit)}
 			title='Airbnb your home!'
 			body={bodyContent}
 			footer={footerContent}
