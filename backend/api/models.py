@@ -28,10 +28,13 @@ class Listing(models.Model):
         _("Guests"), blank=False, null=False, validators=[MinValueValidator(1)])
     bathroomCount = models.SmallIntegerField(
         _("Guests"), blank=False, null=False, validators=[MinValueValidator(1)])
-    category = models.ForeignKey("Category", verbose_name=_(
-        "Category"), on_delete=models.CASCADE, blank=False, null=False)
     location = models.CharField(
         _("Location"), max_length=50, blank=False, null=False)
+    created_at = models.DateTimeField(_("Date"), auto_now_add=True, blank=True)
+    creator = models.ForeignKey(
+        "accounts.User", verbose_name=_("Creator"), on_delete=models.CASCADE, blank=False, null=False)
+    category = models.ForeignKey("Category", verbose_name=_(
+        "Category"), on_delete=models.CASCADE, blank=False, null=False)
 
     class Meta:
         verbose_name = "Listing"
