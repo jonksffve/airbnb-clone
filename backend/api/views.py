@@ -3,6 +3,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from accounts.serializers import UserSerializer, TokenSerializer
 from .serializers import ListingSerializer
@@ -15,6 +16,13 @@ user_model = get_user_model()
 
 
 class UserCreateView(CreateAPIView):
+    """
+    Returns a list of all **active** accounts in the system.
+
+    For more details on how accounts are activated please [see here][ref].
+
+    [ref]: http://example.com/activating-accounts
+    """
     queryset = user_model.objects.all()
     serializer_class = UserSerializer
 
@@ -36,12 +44,14 @@ class CustomAuthToken(ObtainAuthToken):
 
 
 class UserRetrieveView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Token.objects.all()
     serializer_class = TokenSerializer
     lookup_field = 'key'
 
 
 class ListingCreateView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Listing.objects.all()
     serializer_class = ListingSerializer
 
@@ -59,4 +69,4 @@ class ListingCreateView(CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer, category_obj):
-        serializer.save(category=category_obj)
+        serializer.save(creator=self.request.user, category=category_obj)
