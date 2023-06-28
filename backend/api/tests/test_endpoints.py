@@ -148,3 +148,14 @@ class AccountTests(TestSetUp):
                                     'category': 'Castillo',
                                     'location': ''}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # IF category is not defined
+        response = self.client.post(self.listing_endpoint, {
+                                    'title': '',
+                                    'description': '',
+                                    'price': '0',
+                                    'guestCount': '0',
+                                    'roomCount': '0',
+                                    'bathroomCount': '0',
+                                    'location': ''}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
