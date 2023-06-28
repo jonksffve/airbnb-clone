@@ -8,6 +8,7 @@ import CategoryInput from '../UIhelpers/Inputs/CategoryInput';
 import { useForm } from 'react-hook-form';
 import CountrySelect from '../UIhelpers/Inputs/CountrySelect';
 import MapDisplay from '../MapDisplay';
+import BasicDetail from '../UIhelpers/Inputs/BasicDetail';
 
 const STEPS = {
 	CATEGORY: 0,
@@ -46,6 +47,9 @@ const RentModal = () => {
 
 	const category = watch('category');
 	const location = watch('location');
+	const guestCount = watch('guestCount');
+	const roomCount = watch('roomCount');
+	const bathroomCount = watch('bathroomCount');
 
 	const setCustomValue = (id, value) => {
 		setValue(id, value, {
@@ -123,6 +127,41 @@ const RentModal = () => {
 					value={location}
 				/>
 				<MapDisplay center={location?.latlng} />
+			</div>
+		);
+	}
+
+	if (step === STEPS.INFO) {
+		bodyContent = (
+			<div className='flex flex-col gap-8'>
+				<Heading
+					title='Share some basic information about your place'
+					subtitle='What amenities do you have?'
+				/>
+				<BasicDetail
+					title='Guests'
+					subtitle='How many guests?'
+					value={guestCount}
+					onChange={(value) => {
+						setCustomValue('guestCount', value);
+					}}
+				/>
+				<BasicDetail
+					title='Rooms'
+					subtitle='How many rooms does it have?'
+					value={roomCount}
+					onChange={(value) => {
+						setCustomValue('roomCount', value);
+					}}
+				/>
+				<BasicDetail
+					title='Bathroom'
+					subtitle='How many bathrooms does it have?'
+					value={bathroomCount}
+					onChange={(value) => {
+						setCustomValue('bathroomCount', value);
+					}}
+				/>
 			</div>
 		);
 	}
