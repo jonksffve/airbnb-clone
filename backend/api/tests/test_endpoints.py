@@ -47,11 +47,11 @@ class AccountTests(TestSetUp):
                                     'password': 'foo123'
                                     })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['first_name'],
+        self.assertEqual(response.data['user']['first_name'],
                          self.user_object.first_name)
-        self.assertEqual(response.data['last_name'],
+        self.assertEqual(response.data['user']['last_name'],
                          self.user_object.last_name)
-        self.assertEqual(response.data['email'],
+        self.assertEqual(response.data['user']['email'],
                          self.user_object.email)
 
     def test_can_get_user(self):
