@@ -1,14 +1,20 @@
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from accounts.serializers import UserSerializer, TokenSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from django.contrib.auth import get_user_model
 from rest_framework.response import Response
+from rest_framework import status
+
+from accounts.serializers import UserSerializer, TokenSerializer
+from .serializers import ListingSerializer
+
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+from .models import Listing, Category
 
 user_model = get_user_model()
 
 
-class UserCreationView(CreateAPIView):
+class UserCreateView(CreateAPIView):
     queryset = user_model.objects.all()
     serializer_class = UserSerializer
 
@@ -29,7 +35,24 @@ class CustomAuthToken(ObtainAuthToken):
         })
 
 
-class RetrieveUserInformation(RetrieveAPIView):
+class UserRetrieveView(RetrieveAPIView):
     queryset = Token.objects.all()
     serializer_class = TokenSerializer
     lookup_field = 'key'
+
+
+class ListingCreateView(CreateAPIView):
+    queryset = Listing.objects.all()
+    serializer_class = ListingSerializer
+
+    def create(self, request, *args, **kwargs):
+        category_obj = get_object_or_404(
+            Category, name=request.data['category'])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer, category_obj)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer, category_obj):
+        serializer.save(category=category_obj)
