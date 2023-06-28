@@ -46,8 +46,12 @@ class ListingCreateView(CreateAPIView):
     serializer_class = ListingSerializer
 
     def create(self, request, *args, **kwargs):
+        try:
+            category_name = request.data['category']
+        except:
+            category_name = None
         category_obj = get_object_or_404(
-            Category, name=request.data['category'])
+            Category, name=category_name)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer, category_obj)
