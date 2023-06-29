@@ -121,4 +121,4 @@ class FavoriteDestroyView(DestroyAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrStaff]
     queryset = FavoriteListing.objects.all()
     serializer_class = FavoriteSerializer
-    lookup_field = 'pk'
+    lookup_field = 'listing'
