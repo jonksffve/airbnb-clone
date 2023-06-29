@@ -1,4 +1,6 @@
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
+from rest_framework.generics import (CreateAPIView,
+                                     ListCreateAPIView,
+                                     RetrieveAPIView)
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -50,7 +52,7 @@ class UserRetrieveView(RetrieveAPIView):
     lookup_field = 'key'
 
 
-class ListingCreateView(CreateAPIView):
+class ListingCreateListView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Listing.objects.all()
     serializer_class = ListingSerializer
