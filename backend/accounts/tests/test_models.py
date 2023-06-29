@@ -3,11 +3,10 @@ from .test_setup import TestSetUp
 
 
 class UsersManagersTests(TestSetUp):
-    """
-    Testing account User model
-    """
-
     def test_create_user(self):
+        """
+        Testing normal account User model
+        """
         self.assertEqual(self.user_object.email, "normal@user.com")
         self.assertEqual(self.user_object.first_name, "Test")
         self.assertEqual(self.user_object.last_name, "Prueba")
@@ -33,6 +32,9 @@ class UsersManagersTests(TestSetUp):
                 email="normal@user.com", password="foo")
 
     def test_create_superuser(self):
+        """
+        Testing superuser account User model
+        """
         self.assertEqual(self.admin_object.email, "super@user.com")
         self.assertEqual(self.admin_object.first_name, "admin")
         self.assertEqual(self.admin_object.last_name, "admin")
