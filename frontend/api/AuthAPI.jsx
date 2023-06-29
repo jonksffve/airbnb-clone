@@ -4,6 +4,7 @@ import { toastOptions } from '../config/toastifyConfig';
 import {
 	ENDPOINT_ACCOUNT,
 	ENDPOINT_AUTH,
+	ENDPOINT_FAVORITE,
 	ENDPOINT_LISTING,
 } from '../config/apiRoutesConfig';
 
@@ -96,5 +97,33 @@ export const readListingAPI = async (
 		dispatch({ listings: [] });
 		setIsEmpty(true);
 		toast.error('Something happened, fetching data.', toastOptions);
+	}
+};
+
+export const favoriteAPI = async (listingID, token, liked, setLikeState) => {
+	try {
+		if (liked) {
+			await axios.delete(`${ENDPOINT_FAVORITE}${listingID}/`, {
+				headers: {
+					Authorization: `Token ${token}`,
+				},
+			});
+		} else {
+			await axios.post(
+				ENDPOINT_FAVORITE,
+				{
+					listingID,
+				},
+				{
+					headers: {
+						Authorization: `Token ${token}`,
+					},
+				}
+			);
+		}
+		//We toggle state
+		setLikeState(!liked);
+	} catch (error) {
+		toast.error('Something happened.', toastOptions);
 	}
 };
