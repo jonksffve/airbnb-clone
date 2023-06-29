@@ -57,4 +57,4 @@ class FavoriteListing(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.user.get_full_name()} favorites {self.listing.id}'
+        return f'{self.user.get_full_name()} favorites {self.listing.title}'
