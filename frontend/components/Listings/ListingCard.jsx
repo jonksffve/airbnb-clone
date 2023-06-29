@@ -1,12 +1,18 @@
 import { useSelector } from 'react-redux';
 import HeartButton from '../UIhelpers/HeartButton';
 import { getByValue } from '../../hooks/WorldCountries';
+import { favoriteAPI } from '../../api/AuthAPI';
+import { useState } from 'react';
 
 const ListingCard = ({ data }) => {
 	const user = useSelector((state) => state.user);
 	const reservationDate = undefined;
-
 	const fullLocation = getByValue(data.location);
+	const [likeState, setLikeState] = useState(data.is_liked);
+
+	const handleLike = () => {
+		favoriteAPI(data.id, user.token, likeState, setLikeState);
+	};
 
 	return (
 		<div className='group col-span-1 cursor-pointer'>
@@ -19,8 +25,8 @@ const ListingCard = ({ data }) => {
 					/>
 					<div className='absolute right-3 top-3'>
 						<HeartButton
-							listingID={data.id}
-							userID={user.id}
+							liked={likeState}
+							onClick={handleLike}
 						/>
 					</div>
 				</div>
