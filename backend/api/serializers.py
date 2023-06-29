@@ -15,5 +15,5 @@ class ListingSerializer(ModelSerializer):
 
     class Meta:
         model = Listing
-        fields = ['title', 'description', 'image', 'price', 'guestCount',
+        fields = ['id', 'title', 'description', 'image', 'price', 'guestCount',
                   'roomCount', 'bathroomCount', 'category', 'location', 'creator']
