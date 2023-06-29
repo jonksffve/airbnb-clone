@@ -13,6 +13,7 @@ import ImagesUploadInput from '../UIhelpers/Inputs/ImagesUploadInput';
 import Input from '../UIhelpers/Inputs/Input';
 import { createListingAPI } from '../../api/AuthAPI';
 import Spinner from '../UIhelpers/Spinner';
+import { listingsActions } from '../../store/listings-slice';
 
 const STEPS = {
 	CATEGORY: 0,
@@ -80,7 +81,10 @@ const RentModal = () => {
 		const response = await createListingAPI(
 			data,
 			setIsLoading,
-			userState.token
+			userState.token,
+			(value) => {
+				dispatch(listingsActions.appendListing(value));
+			}
 		);
 
 		if (response.status === 201) {
