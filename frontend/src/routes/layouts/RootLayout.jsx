@@ -38,15 +38,15 @@ const RootLayout = () => {
 	}, [dispatch]);
 
 	return (
-		<Fragment>
+		<div className='flex h-[100vh] flex-col'>
 			<MainNavigation />
-			<main>
+			<main className='pb-12 pt-28'>
 				<Outlet />
 			</main>
 			<RentModal />
 			<RegisterModal />
 			<LoginModal />
-		</Fragment>
+		</div>
 	);
 };
 

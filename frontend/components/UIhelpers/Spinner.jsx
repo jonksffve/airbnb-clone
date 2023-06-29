@@ -3,7 +3,7 @@ import { Spin } from 'antd';
 const Spinner = () => {
 	return (
 		<Spin
-			tip='Sending data'
+			tip='LOADING'
 			size='large'
 		>
 			<div className='content h-[35vh]' />
