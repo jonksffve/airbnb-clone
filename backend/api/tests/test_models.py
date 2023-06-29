@@ -1,5 +1,5 @@
 from django.test import TransactionTestCase
-from api.models import Listing, Category
+from api.models import Listing, Category, FavoriteListing
 from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 
@@ -19,6 +19,8 @@ class ListingsTestCase(TransactionTestCase):
             bathroomCount=2,
             category=self.cat,
             location="USA")
+        self.favorite = FavoriteListing.objects.create(
+            listing=self.listing, user=self.user_obj)
 
     def test_listings_creation(self):
         """
@@ -66,3 +68,27 @@ class ListingsTestCase(TransactionTestCase):
                 roomCount=2,
                 bathroomCount=1,
                 location="USA")
+
+    def test_favorite_creation(self):
+        """
+        Tests used in order to determine favorite model usage
+        """
+        self.assertEqual(FavoriteListing.objects.count(), 1)
+        self.assertEqual(self.favorite.user, self.user_obj)
+        self.assertEqual(self.favorite.listing, self.listing)
+        self.assertEqual(self.favorite.user.first_name, 'Test')
+        self.assertEqual(str(self.favorite), 'Test Prueba favorites 1')
+        # with nothing
+        with self.assertRaises(IntegrityError):
+            FavoriteListing.objects.create()
+        # with user
+        with self.assertRaises(IntegrityError):
+            FavoriteListing.objects.create(user=self.user_obj)
+        # with listing
+        with self.assertRaises(IntegrityError):
+            FavoriteListing.objects.create(listing=self.listing)
+        # duplicated
+        with self.assertRaises(IntegrityError):
+            FavoriteListing.objects.create(
+                user=self.user_obj, listing=self.listing)
+        self.assertEqual(FavoriteListing.objects.count(), 1)

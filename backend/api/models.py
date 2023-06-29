@@ -42,3 +42,19 @@ class Listing(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class FavoriteListing(models.Model):
+    listing = models.ForeignKey(Listing, verbose_name=_(
+        ""), related_name='favorites', on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        "accounts.User", verbose_name=_(""), on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['listing', 'user'], name='unique_listing_user')
+        ]
+
+    def __str__(self):
+        return f'{self.user.get_full_name()} favorites {self.listing.id}'
