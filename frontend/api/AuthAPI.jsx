@@ -51,7 +51,7 @@ export const getUserInformationAPI = async (token) => {
 	}
 };
 
-export const createListingAPI = async (data, setIsLoading, token) => {
+export const createListingAPI = async (data, setIsLoading, token, dispatch) => {
 	try {
 		const response = await axios.postForm(ENDPOINT_LISTING, data, {
 			withCredentials: false,
@@ -62,6 +62,7 @@ export const createListingAPI = async (data, setIsLoading, token) => {
 		});
 		toast.success('Listing created!', toastOptions);
 		setIsLoading(false);
+		dispatch({ listing: response.data });
 		return response;
 	} catch (error) {
 		if (error.response.data) {
@@ -70,5 +71,30 @@ export const createListingAPI = async (data, setIsLoading, token) => {
 			}
 		}
 		return error.response;
+	}
+};
+
+export const readListingAPI = async (
+	token,
+	dispatch,
+	setIsLoading,
+	setIsEmpty
+) => {
+	try {
+		const response = await axios.get(ENDPOINT_LISTING, {
+			withCredentials: false,
+			headers: {
+				'content-type': 'multipart/form-data',
+				Authorization: `Token ${token}`,
+			},
+		});
+		setIsLoading(false);
+		dispatch({ listings: response.data });
+		setIsEmpty(response.data.length === 0);
+	} catch (error) {
+		setIsLoading(false);
+		dispatch({ listings: [] });
+		setIsEmpty(true);
+		toast.error('Something happened, fetching data.', toastOptions);
 	}
 };
