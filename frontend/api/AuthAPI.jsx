@@ -8,6 +8,9 @@ import {
 	ENDPOINT_LISTING,
 } from '../config/apiRoutesConfig';
 
+//? CRUD HELPER FUNCTIONS
+
+//* CREATE
 export const registerUserAPI = async (data, setIsLoading) => {
 	try {
 		const response = await axios.post(ENDPOINT_ACCOUNT, data, {
@@ -38,20 +41,6 @@ export const getAuthorizationAPI = async (data, setIsLoading) => {
 	}
 };
 
-export const getUserInformationAPI = async (token) => {
-	try {
-		const response = await axios.get(`${ENDPOINT_ACCOUNT}${token}/`, {
-			headers: {
-				Authorization: `Token ${token}`,
-			},
-		});
-		return response;
-	} catch (error) {
-		toast.error('Please check credentials.', toastOptions);
-		return error.response;
-	}
-};
-
 export const createListingAPI = async (data, setIsLoading, token, dispatch) => {
 	try {
 		const response = await axios.postForm(ENDPOINT_LISTING, data, {
@@ -71,6 +60,21 @@ export const createListingAPI = async (data, setIsLoading, token, dispatch) => {
 				toast.error(`Please check: ${err}`, toastOptions);
 			}
 		}
+		return error.response;
+	}
+};
+
+//* READ
+export const getUserInformationAPI = async (token) => {
+	try {
+		const response = await axios.get(`${ENDPOINT_ACCOUNT}${token}/`, {
+			headers: {
+				Authorization: `Token ${token}`,
+			},
+		});
+		return response;
+	} catch (error) {
+		toast.error('Please check credentials.', toastOptions);
 		return error.response;
 	}
 };
@@ -99,6 +103,27 @@ export const readListingAPI = async (
 		toast.error('Something happened, fetching data.', toastOptions);
 	}
 };
+
+export const getListingInformationAPI = async (
+	listingID,
+	token,
+	setListing
+) => {
+	try {
+		const response = await axios.get(`${ENDPOINT_LISTING}${listingID}/`, {
+			headers: {
+				Authorization: `Token ${token}`,
+			},
+		});
+		setListing(response.data);
+	} catch (error) {
+		toast.error('Something very wrong happened!', toastOptions);
+	}
+};
+
+//* UPDATE
+
+//* CREATE - DELETE
 
 export const favoriteAPI = async (listingID, token, liked, setLikeState) => {
 	try {
