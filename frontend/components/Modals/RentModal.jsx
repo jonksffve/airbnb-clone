@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uiActions } from '../../store/ui-slice';
 import { useMemo, useState } from 'react';
 import Heading from './Heading';
-import { categories } from '../Menu/Categories';
 import CategoryInput from '../UIhelpers/Inputs/CategoryInput';
 import { useForm } from 'react-hook-form';
 import CountrySelect from '../UIhelpers/Inputs/CountrySelect';
@@ -14,6 +13,7 @@ import Input from '../UIhelpers/Inputs/Input';
 import { createListingAPI } from '../../api/AuthAPI';
 import Spinner from '../UIhelpers/Spinner';
 import { listingsActions } from '../../store/listings-slice';
+import { getCategories } from '../../hooks/Categories';
 
 const STEPS = {
 	CATEGORY: 0,
@@ -30,6 +30,9 @@ const RentModal = () => {
 	const dispatch = useDispatch();
 	const [step, setStep] = useState(STEPS.CATEGORY);
 	const [isLoading, setIsLoading] = useState(false);
+	const [country, setCountry] = useState(undefined);
+
+	const categories = getCategories();
 
 	const {
 		register,
@@ -155,8 +158,9 @@ const RentModal = () => {
 						setCustomValue('location', location);
 					}}
 					value={location}
+					setCountry={setCountry}
 				/>
-				<MapDisplay center={location?.latlng} />
+				<MapDisplay center={country} />
 			</div>
 		);
 	}
