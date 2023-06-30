@@ -1,7 +1,7 @@
 import { Select, Space } from 'antd';
-import { getAll } from '../../../hooks/WorldCountries';
+import { getAll, getByValue } from '../../../hooks/WorldCountries';
 
-const CountrySelect = ({ onSelect, value }) => {
+const CountrySelect = ({ onSelect, value, setCountry }) => {
 	const countries = getAll();
 	const { Option } = Select;
 
@@ -12,6 +12,7 @@ const CountrySelect = ({ onSelect, value }) => {
 			value={value}
 			onChange={(value) => {
 				onSelect(value);
+				setCountry(getByValue(value).latlng);
 			}}
 			allowClear
 		>
