@@ -40,7 +40,7 @@ const RootLayout = () => {
 	return (
 		<div className='flex h-[100vh] flex-col'>
 			<MainNavigation />
-			<main className='pb-12 pt-28'>
+			<main className='p-5'>
 				<Outlet />
 			</main>
 			<RentModal />
