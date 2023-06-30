@@ -7,7 +7,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsOwnerOrStaff
+# from .permissions import IsOwnerOrStaff (deprecated, is done by QuerySets now)
 
 from accounts.serializers import UserSerializer, TokenSerializer
 from .serializers import ListingSerializer, FavoriteSerializer
@@ -116,9 +116,13 @@ class FavoriteDestroyView(DestroyAPIView):
     """
     Deletes a model instance of FavoriteListing
     """
-    # @permissions: user needs to be authenticated and be the owner of the object itself
+    # @permissions: user needs to be authenticated and be the owner of the object itself (this is done by filtering querysets both for listing and user)
     # @accepts: DELETE methods
-    permission_classes = [IsAuthenticated, IsOwnerOrStaff]
-    queryset = FavoriteListing.objects.all()
+    permission_classes = [IsAuthenticated]
+    queryset = None
     serializer_class = FavoriteSerializer
     lookup_field = 'listing'
+
+    def get_queryset(self):
+        # We make sure to filter the data based on loggedin user, so he is the owner!
+        return FavoriteListing.objects.filter(user=self.request.user)

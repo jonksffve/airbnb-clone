@@ -291,27 +291,26 @@ class AccountTests(TestSetUp):
             }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
 
     def test_can_delete_favorite(self):
-        # Created a post to delete!
+        # Created a favorite to delete!
         response = self.client.post(self.listing_favorite_endpoint, {
             "listingID": self.listing.id
         }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
-        id = response.data['id']
         # Make sure it was created!
         self.assertEqual(FavoriteListing.objects.count(), 2)
         # Attempts to delete it:
         # CASE: without logged in
         response = self.client.delete(
-            f'{self.listing_favorite_endpoint}{id}/', format='json')
+            f'{self.listing_favorite_endpoint}{self.listing.id}/', format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        # CASE: not beign the owner user
-        response = self.client.delete(f'{self.listing_favorite_endpoint}{self.favorited_by_second_user.id}/',
-                                      format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         # FINALLY deleting with beign logged in / ownership
-        response = self.client.delete(f'{self.listing_favorite_endpoint}{id}/',
+        response = self.client.delete(f'{self.listing_favorite_endpoint}{self.listing.id}/',
                                       format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(FavoriteListing.objects.count(), 1)
+        # CASE: not beign the owner user (will throw a 404 since we can't find it!)
+        response = self.client.delete(f'{self.listing_favorite_endpoint}{self.favorited_by_second_user.listing.id}/',
+                                      format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         # can not delete invalid listings
         response = self.client.delete(f'{self.listing_favorite_endpoint}12312312/',
                                       format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')

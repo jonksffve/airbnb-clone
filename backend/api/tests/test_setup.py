@@ -27,7 +27,7 @@ class TestSetUp(APITransactionTestCase):
         self.first_user_obj = self.user_model.objects.create_user(
             email="normal@user.com", password="foo123", first_name="Test", last_name="Prueba")
         self.second_user_obj = self.user_model.objects.create_user(
-            email="normal2@user.com", password="foo123", first_name="Test", last_name="Prueba")
+            email="normal2@user.com", password="foo123", first_name="Test 2", last_name="Prueba 2")
 
         # 1 CATEGORY TO WORK WITH
         self.category = Category.objects.create(name='Castillo')
