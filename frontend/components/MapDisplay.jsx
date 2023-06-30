@@ -1,7 +1,13 @@
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const MapDisplay = ({ center }) => {
+	const UpdateCenter = ({ center }) => {
+		const map = useMap();
+		map.setView(center, map.getZoom());
+		return null;
+	};
+
 	return (
 		<MapContainer
 			center={center || [51.505, -0.09]}
@@ -14,6 +20,7 @@ const MapDisplay = ({ center }) => {
 				url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 			/>
 			<Marker position={center || [51.505, -0.09]} />
+			<UpdateCenter center={center || [51.505, -0.09]} />
 		</MapContainer>
 	);
 };
