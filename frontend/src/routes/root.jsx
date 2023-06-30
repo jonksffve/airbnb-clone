@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import RootLayout from './layouts/RootLayout';
 import Index from '../../pages/Index';
+import ListingDetail from '../../pages/ListingDetail';
 
 export const router = createBrowserRouter([
 	{
@@ -10,6 +11,10 @@ export const router = createBrowserRouter([
 			{
 				index: true,
 				element: <Index />,
+			},
+			{
+				path: ':id/',
+				element: <ListingDetail />,
 			},
 		],
 	},
