@@ -1,32 +1,27 @@
-import { useSelector } from 'react-redux';
 import HeartButton from '../UIhelpers/HeartButton';
 import { getByValue } from '../../hooks/WorldCountries';
-import { favoriteAPI } from '../../api/AuthAPI';
-import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const ListingCard = ({ data }) => {
-	const user = useSelector((state) => state.user);
+const ListingCard = ({ data, token }) => {
 	const reservationDate = undefined;
 	const fullLocation = getByValue(data.location);
-	const [likeState, setLikeState] = useState(data.is_liked);
-
-	const handleLike = () => {
-		favoriteAPI(data.id, user.token, likeState, setLikeState);
-	};
 
 	return (
 		<div className='group col-span-1 cursor-pointer'>
 			<div className='flex w-full flex-col gap-2'>
 				<div className='relative aspect-square w-full overflow-hidden rounded-xl'>
-					<img
-						className='h-full w-full object-cover transition group-hover:scale-110'
-						src={data.image}
-						alt=''
-					/>
+					<Link to={`${data.id}`}>
+						<img
+							className='h-full w-full object-cover transition group-hover:scale-110'
+							src={data.image}
+							alt=''
+						/>
+					</Link>
 					<div className='absolute right-3 top-3'>
 						<HeartButton
-							liked={likeState}
-							onClick={handleLike}
+							token={token}
+							liked={data.is_liked}
+							listingID={data.id}
 						/>
 					</div>
 				</div>
