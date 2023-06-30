@@ -126,3 +126,10 @@ class FavoriteDestroyView(DestroyAPIView):
     def get_queryset(self):
         # We make sure to filter the data based on loggedin user, so he is the owner!
         return FavoriteListing.objects.filter(user=self.request.user)
+
+
+##### TESTS DONE UNTIL THIS POINT #######
+class ListingRetrieveView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Listing.objects.all()
+    serializer_class = ListingSerializer
