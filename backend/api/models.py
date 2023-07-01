@@ -4,7 +4,8 @@ from django.core.validators import MinValueValidator
 
 
 class Category(models.Model):
-    name = models.CharField(_("Category"), max_length=50)
+    name = models.CharField(_("Category"), max_length=50,
+                            blank=False, null=False, unique=True)
 
     class Meta:
         verbose_name = _("Category")
@@ -58,3 +59,17 @@ class FavoriteListing(models.Model):
 
     def __str__(self):
         return f'{self.user.get_full_name()} favorites {self.listing.title}'
+
+
+class ReservationListing(models.Model):
+    listing = models.ForeignKey(Listing, verbose_name=_(
+        ""), related_name="revervations", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        "accounts.User", verbose_name=_(""), on_delete=models.CASCADE)
+    start_date = models.DateTimeField(
+        _(""), blank=False, null=False, auto_now=False, auto_now_add=False)
+    end_date = models.DateTimeField(
+        _(""), blank=False, null=False, auto_now=False, auto_now_add=False)
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} reservated: {self.listing.title}"
