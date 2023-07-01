@@ -1,6 +1,7 @@
 from rest_framework.test import APITransactionTestCase
 from django.contrib.auth import get_user_model
-from ..models import Category, Listing, FavoriteListing
+from ..models import Category, Listing, FavoriteListing, ReservationListing
+from django.utils.timezone import now, timedelta
 
 
 class TestSetUp(APITransactionTestCase):
@@ -16,6 +17,7 @@ class TestSetUp(APITransactionTestCase):
         self.auth_endpoint = "/api/auth/token_auth/"
         self.listing_endpoint = "/api/listing/"
         self.listing_favorite_endpoint = "/api/listing/favorite/"
+        self.reservation_endpoint = "/api/reservation/"
 
         ####
         # BASIC INSTANCES CONFIG SETUP
@@ -46,6 +48,10 @@ class TestSetUp(APITransactionTestCase):
         # 1 FAVORITE LISTING TO WORK WITH
         self.favorited_by_second_user = FavoriteListing.objects.create(
             listing=self.listing, user=self.second_user_obj)
+
+        # 1 RESERVATION TO WORK WITH AND CHECK DATE RESTRICTIONS! UP TO A WEEK SINCE TOMORROW!
+        self.reservation = ReservationListing.objects.create(
+            listing=self.listing, user=self.first_user_obj, start_date=(now() + timedelta(1)), end_date=(now() + timedelta(8)))
 
         # 1 Authenticated user to check permissions
         self.authenticated_user = self.client.post(self.auth_endpoint, {

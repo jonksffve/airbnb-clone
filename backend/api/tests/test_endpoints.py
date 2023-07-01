@@ -1,105 +1,162 @@
 from .test_setup import TestSetUp
 from rest_framework import status
-from ..models import Listing, FavoriteListing
+from ..models import Listing, FavoriteListing, ReservationListing
 from django.db.utils import IntegrityError
+from django.utils.timezone import now, timedelta
 
 
 class AccountTests(TestSetUp):
-    def test_can_create_account(self):
+    def test_reservation_endpoint(self):
         """
-        Ensure we can create a new account object. (valid data)
+        Basic testing to ensure the functionality of this endpoint
+        @accepts: [GET, POST]
         """
-        response = self.client.post(
-            self.account_endpoint,
-            self.user_data_valid,
-            format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        userObj = self.user_model.objects.get(
-            email=self.user_data_valid['email'])
-        self.assertEqual(self.user_model.objects.count(), 3)
-        self.assertEqual(userObj.first_name, 'Testing')
-        self.assertEqual(userObj.last_name, 'Endpoints')
-        self.assertTrue(userObj.is_active)
-        self.assertFalse(userObj.is_staff)
-        self.assertFalse(userObj.is_superuser)
-        self.assertEqual(userObj.get_full_name(),
-                         'Testing Endpoints')
 
-    def test_can_not_create_account(self):
+        # User needs to be authenticated for both GET, POST methods
+        response = self.client.post(self.reservation_endpoint, {
+            "listing": self.listing.id,
+            "start_date": now() + timedelta(9),
+            "end_date": now() + timedelta(14),
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        response = self.client.get(self.reservation_endpoint)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # We're filtering the data based on listings:
+        # Returns http400 if we don't attach "listingID" as query_params
+        response = self.client.get(f'{self.reservation_endpoint}?listing=123',
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Returns http404 if listing does not exists
+        response = self.client.get(f'{self.reservation_endpoint}?listingID=123',
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Succesfully create an object
+        response = self.client.post(self.reservation_endpoint, {
+            "listing": self.listing.id,
+            "start_date": now() + timedelta(9),
+            "end_date": now() + timedelta(14),
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['listing'], self.listing.id)
+        self.assertEqual(response.data['user'], self.first_user_obj.id)
+        self.assertEqual(ReservationListing.objects.count(), 2)
+        newCreatedListingID = response.data['listing']
+
+        # Testing GET method
+        response = self.client.get(f'{self.reservation_endpoint}?listingID={newCreatedListingID}',
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Validation no data
+        response = self.client.post(self.reservation_endpoint, {
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Validation dates (past date)
+        response = self.client.post(self.reservation_endpoint, {
+            "listing": self.listing.id,
+            "start_date": now() - timedelta(1),
+            "end_date": now() + timedelta(6),
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Validation dates (end date lower than start date)
+        response = self.client.post(self.reservation_endpoint, {
+            "listing": self.listing.id,
+            "start_date": now(),
+            "end_date": now() - timedelta(1),
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        #
+        # By default in our setup file, the current listing is reserved for a week from timezone.now() + 1 day
+        # Validating that we can't reserved any day from now up to a week since tomorrow
+        #
+        # Validating case in between reservation
+        response = self.client.post(self.reservation_endpoint, {
+            "listing": self.listing.id,
+            "start_date": now() + timedelta(2),
+            "end_date": now() + timedelta(4),
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Validating equal reservation
+        response = self.client.post(self.reservation_endpoint, {
+            "listing": self.listing.id,
+            "start_date": now() + timedelta(1),
+            "end_date": now() + timedelta(8),
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Validating bigger (range) reservation
+        response = self.client.post(self.reservation_endpoint, {
+            "listing": self.listing.id,
+            "start_date": now(),
+            "end_date": now() + timedelta(10),
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Validating just 1 day reserved in between a bigger reservation
+        # Can create 1 day/night reservation
+        # Creation:
+        ReservationListing.objects.create(listing=self.listing, user=self.first_user_obj, start_date=now(
+        ) + timedelta(15), end_date=now() + timedelta(15))
+        # Validation:
+        response = self.client.post(self.reservation_endpoint, {
+            "listing": self.listing.id,
+            "start_date": now() + timedelta(10),
+            "end_date": now() + timedelta(20),
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(ReservationListing.objects.count(), 3)
+
+    def test_account_endpoint(self):
         """
-        Ensure we can not create a new account object (invalid data).
+        Tests defined to check the usage of the UserCreateView
+        @accepts: [POST]
         """
+        # Ensure we can create accounts (valid data)
+        response = self.client.post(
+            self.account_endpoint, self.user_data_valid, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(self.user_model.objects.count(), 3)
+
+        # Ensure we can not create a new account object (invalid data).
         response = self.client.post(
             self.account_endpoint, self.user_data_invalid, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.user_model.objects.count(), 2)
+        self.assertEqual(self.user_model.objects.count(), 3)
 
-    def test_responses_endpoint(self):
+    def test_account_retrieve_endpoint(self):
         """
-        Ensure we can only use the right method or permission.
+        Make sure we can get user information to this endpoint
+        @ needs to be authenticated
+        @ accepts [GET]
         """
-        # ---------- RIGHT METHOD ----------#
-        # CREATE USER VIEW SHOULD ONLY TAKE "POST"
-        response = self.client.get(self.account_endpoint)
-        self.assertEqual(response.status_code,
-                         status.HTTP_405_METHOD_NOT_ALLOWED)
-
-        # RETRIEVE USER INFORMATION VIEW SHOULD ONLY TAKE "GET"
-        response = self.client.post(
-            f'{self.account_endpoint}{self.authenticated_user["token"]}/', data={}, HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
-        self.assertEqual(response.status_code,
-                         status.HTTP_405_METHOD_NOT_ALLOWED)
-
-        # AUTHENTICATION VIA TOKEN SHOULD ONLY ACCEPT "POST"
-        response = self.client.get(self.auth_endpoint)
-        self.assertEqual(response.status_code,
-                         status.HTTP_405_METHOD_NOT_ALLOWED)
-
-        # FAVORITE CREATE SHOULD ONLY TAKE "POST"
-        response = self.client.get(self.listing_favorite_endpoint,
-                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
-        self.assertEqual(response.status_code,
-                         status.HTTP_405_METHOD_NOT_ALLOWED)
-
-        # FAVORITE DESTROY SHOULD ONLY TAKE "DELETE"
-        response = self.client.get(f"{self.listing_favorite_endpoint}123/",
-                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
-        self.assertEqual(response.status_code,
-                         status.HTTP_405_METHOD_NOT_ALLOWED)
-
-        # ---------- PERMISSIONS ----------#
-        # RETRIEVE USER INFORMATION REQUIRES TO BE LOGGED IN
         response = self.client.get(
-            f'{self.account_endpoint}{self.authenticated_user["token"]}/')
-        self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+            f"{self.account_endpoint}{self.authenticated_user['token']}/", HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['user']['first_name'],
+                         self.authenticated_user['user']['first_name'])
+        self.assertEqual(response.data['user']['last_name'],
+                         self.authenticated_user['user']['last_name'])
+        self.assertEqual(response.data['user']['email'],
+                         self.authenticated_user['user']['email'])
+        # Checking authentication requirement
+        response = self.client.get(
+            f"{self.account_endpoint}{self.authenticated_user['token']}/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        # LISTING GET **ALL** INFORMATION REQUIRES TO BE LOGGED IN
-        response = self.client.get(self.listing_endpoint)
-        self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
-
-        # LISTING CREATE REQUIRES TO BE LOGGED IN
-        response = self.client.post(self.listing_endpoint, data={})
-        self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
-
-        # FAVORITE CREATE VIEW REQUIRES TO BE LOGGED IN
-        response = self.client.post(self.listing_favorite_endpoint, data={})
-        self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
-
-        # FAVORITE DELETE VIEW REQUIRES TO BE LOGGED IN
-        response = self.client.delete(
-            f"{self.listing_favorite_endpoint}anystrpkwilldo/")
-        self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
-
-    def test_can_get_token(self):
+    def test_authorization_endpoint(self):
         """
-        Make sure we can authenticate users via a token (setup provides 2 user accounts)
+        Tests to validate getting the token given a valid id
+        @accepts: [POST]
         """
-        # Logging in user 1
+        # Logging user 1
         response = self.client.post(self.auth_endpoint, {
                                     'username': 'normal@user.com',
                                     'password': 'foo123'
@@ -123,25 +180,22 @@ class AccountTests(TestSetUp):
                          self.second_user_obj.last_name)
         self.assertEqual(response.data['user']['email'],
                          self.second_user_obj.email)
+        # Trying wrong user
+        response = self.client.post(self.auth_endpoint, {
+                                    'username': 'wrong@user.com',
+                                    'password': 'thisiswrong'
+                                    })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_can_get_user(self):
+    def test_listing_endpoint(self):
         """
-        Make sure we can get user information
+        Testing ListCreate endpoint
+        Endpoint used for both create and list all objects
+        @ permission: needs authentication
+        @ accepts [GET, POST]
+        @ Raises 400,404
         """
-        response = self.client.get(
-            f"{self.account_endpoint}{self.authenticated_user['token']}/", HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['user']['first_name'],
-                         self.authenticated_user['user']['first_name'])
-        self.assertEqual(response.data['user']['last_name'],
-                         self.authenticated_user['user']['last_name'])
-        self.assertEqual(response.data['user']['email'],
-                         self.authenticated_user['user']['email'])
-
-    def test_can_create_listing(self):
-        """
-        Make sure we can create listings with (valid data)
-        """
+        # Creating listings (valid data)
         response = self.client.post(self.listing_endpoint,
                                     data={
                                         'title': 'I have title',
@@ -158,13 +212,10 @@ class AccountTests(TestSetUp):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['title'], 'I have title')
         self.assertEqual(Listing.objects.count(), 2)
-        self.assertEqual(response.data['creator'],
-                         self.authenticated_user['user'])
+        self.assertEqual(response.data['creator']['first_name'],
+                         self.authenticated_user['user']['first_name'])
 
-    def test_can_get_listings(self):
-        """
-        MAKE SURE WE CAN GET **ALL** LISTINGS AND MAKE SURE DATA IS ACCURATE
-        """
+        # Testing LISTING data
         # Authenticate second user (which has a listing liked)
         auth_second_user = self.client.post(self.auth_endpoint, {
             'username': 'normal2@user.com',
@@ -180,10 +231,7 @@ class AccountTests(TestSetUp):
         # make sure favorited is FALSE for 1st user
         self.assertFalse(response_first_user.data[0]['is_liked'])
 
-    def test_can_not_create_listing(self):
-        """
-        Make sure we can not create listing (invalid data)
-        """
+        # Testing situations in which we can't create
         # With empty title
         response = self.client.post(self.listing_endpoint,
                                     data={
@@ -271,46 +319,106 @@ class AccountTests(TestSetUp):
                                     format='json',
                                     HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}'
                                     )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Permission: needs to be logged in
+        response = self.client.get(self.listing_endpoint)
+        self.assertEqual(response.status_code,
+                         status.HTTP_401_UNAUTHORIZED)
+
+    def test_listing_retrieve_endpoint(self):
+        """
+        Test retrieving information for a single instance of a listing model
+        @ permission: needs to be authenticated
+        @ accepts: [GET]
+        """
+        # needs to be authenticated
+        response = self.client.get(
+            f"{self.listing_endpoint}{self.listing.id}/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # invalid id
+        response = self.client.get(f"{self.listing_endpoint}12313/",
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_can_create_favorite(self):
+        # retrieves a single instance model
+        response = self.client.get(f"{self.listing_endpoint}{self.listing.id}/",
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], self.listing.id)
+        self.assertEqual(response.data['title'], self.listing.title)
+        self.assertEqual(
+            response.data['creator']['first_name'], self.listing.creator.first_name)
+
+    def test_favorite_endpoint(self):
         """
-        Make sure we can create favorites
+        Test creation of user favoriting a particular listing
+        @ permissions: user needs to be authenticated
+        @ accepts: [POST]
         """
-        # based on loggedin user
+        # listing id needs to be in request body or 400
+        response = self.client.post(self.listing_favorite_endpoint, {
+            "listing": self.listing.id
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
         # listing needs to exists or 404
+        response = self.client.post(self.listing_favorite_endpoint, {
+            "listingID": "131451"
+        }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # 201 all O.K.
         response = self.client.post(self.listing_favorite_endpoint, {
             "listingID": self.listing.id
         }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(FavoriteListing.objects.count(), 2)
+
         # can't favorite 2 times same listing
         with self.assertRaises(IntegrityError):
             self.client.post(self.listing_favorite_endpoint, {
                 "listingID": self.listing.id
             }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+            self.assertEqual(FavoriteListing.objects.count(), 2)
 
-    def test_can_delete_favorite(self):
+        # authentication
+        response = self.client.post(self.listing_favorite_endpoint, {
+            "listingID": self.listing.id
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_favorite_destroy_endpoint(self):
+        """
+        Testing to delete listing favorite status by user
+        @ permission: ownership (done via filtering queryset)
+        @ permission: needs to be authenticated
+        @ accepts: [DELETE]
+        """
         # Created a favorite to delete!
         response = self.client.post(self.listing_favorite_endpoint, {
             "listingID": self.listing.id
         }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
-        # Make sure it was created!
         self.assertEqual(FavoriteListing.objects.count(), 2)
         # Attempts to delete it:
+
         # CASE: without logged in
         response = self.client.delete(
             f'{self.listing_favorite_endpoint}{self.listing.id}/', format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        # FINALLY deleting with beign logged in / ownership
+
+        # Deleting with beign logged in / ownership
         response = self.client.delete(f'{self.listing_favorite_endpoint}{self.listing.id}/',
                                       format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(FavoriteListing.objects.count(), 1)
+
         # CASE: not beign the owner user (will throw a 404 since we can't find it!)
         response = self.client.delete(f'{self.listing_favorite_endpoint}{self.favorited_by_second_user.listing.id}/',
                                       format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
         # can not delete invalid listings
         response = self.client.delete(f'{self.listing_favorite_endpoint}12312312/',
                                       format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
