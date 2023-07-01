@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { getListingInformationAPI } from '../api/AuthAPI';
 import Container from '../components/UIhelpers/Container';
 import ListingInfo from '../components/Listings/ListingInfo';
+import ListingReservation from '../components/Listings/ListingReservations';
 
 const ListingDetail = () => {
 	const { listingID } = useParams();
@@ -48,6 +49,14 @@ const ListingDetail = () => {
 							bathroomCount={listing.bathroomCount}
 							locationValue={listing.location}
 						/>
+						<div
+							className='order-first
+						mb-10
+						md:order-last
+						md:col-span-3'
+						>
+							<ListingReservation />
+						</div>
 					</div>
 				</div>
 			</div>
