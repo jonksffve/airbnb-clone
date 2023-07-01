@@ -7,12 +7,8 @@ urlpatterns = [
     path('auth/token_auth/', views.CustomAuthToken.as_view()),
     path('listing/', views.ListingCreateListView.as_view()),
     path('listing/favorite/', views.FavoriteCreateView.as_view()),
-
-    ##### TESTS DONE UNTIL THIS POINT #######
-
     path('listing/<str:pk>/', views.ListingRetrieveView.as_view()),
-    ##### TESTS DONE UNTIL THIS POINT #######
-
+    path('reservation/', views.ReservationListCreateView.as_view()),
     path('listing/favorite/<str:listing>/',
          views.FavoriteDestroyView.as_view())
 ]
