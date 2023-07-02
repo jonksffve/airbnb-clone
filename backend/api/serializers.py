@@ -58,7 +58,7 @@ class ReservationSerializer(ModelSerializer):
 
         # userStart <= EndingReserved AND userEnding >= StartReserved
         # @[ref] https://stackoverflow.com/questions/71291099/python-django-filter-avoid-overlapping-between-range-dates
-        if qs.filter(start_date__lte=data['end_date'], end_date__gte=data['start_date']).exists():
+        if qs.filter(start_date__lte=data['end_date'].date(), end_date__gte=data['start_date'].date()).exists():
             raise ValidationError(
                 {'wrong_booking': 'Reservation can not be made for this period. Listing already reserved.'})
 
