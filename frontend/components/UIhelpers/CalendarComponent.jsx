@@ -1,28 +1,22 @@
 import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
+import Spinner from './Spinner';
 
-const CalendarComponent = () => {
-	const handleSelect = (ranges) => {
-		console.log(ranges);
-		// {
-		//   selection: {
-		//     startDate: [native Date Object],
-		//     endDate: [native Date Object],
-		//   }
-		// }
-	};
-
-	const selectionRange = {
-		startDate: new Date(),
-		endDate: new Date(),
-		key: 'selection',
-	};
-
+const CalendarComponent = ({ disabled, value, onChange, disabledDates }) => {
+	if (disabled) {
+		return <Spinner />;
+	}
 	return (
 		<DateRange
-			ranges={[selectionRange]}
-			onChange={handleSelect}
+			rangeColors={['#262626']}
+			ranges={[value]}
+			onChange={onChange}
+			date={new Date()}
+			direction='vertical'
+			showDateDisplay={false}
+			minDate={new Date()}
+			disabledDates={disabledDates}
 		/>
 	);
 };

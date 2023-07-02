@@ -5,8 +5,9 @@ const Spinner = () => {
 		<Spin
 			tip='LOADING'
 			size='large'
+			className='hover:cursor-not-allowed'
 		>
-			<div className='content h-[35vh]' />
+			<div className='content h-[40vh]' />
 		</Spin>
 	);
 };
