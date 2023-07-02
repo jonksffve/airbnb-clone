@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { readListingAPI } from '../api/AuthAPI';
+import { getListingAPI } from '../api/AuthAPI';
 import { useDispatch, useSelector } from 'react-redux';
 import Container from '../components/UIhelpers/Container';
 import IsEmpty from '../components/Listings/IsEmpty';
@@ -23,7 +23,7 @@ const Index = () => {
 	useMemo(() => {
 		if (!user.token) return;
 		setIsLoading(true);
-		readListingAPI(
+		getListingAPI(
 			user.token,
 			(value) => {
 				dispatch(listingsActions.addListings(value));
