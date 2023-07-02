@@ -6,12 +6,13 @@ import {
 	ENDPOINT_AUTH,
 	ENDPOINT_FAVORITE,
 	ENDPOINT_LISTING,
+	ENDPOINT_RESERVATION,
 } from '../config/apiRoutesConfig';
 
 //? CRUD HELPER FUNCTIONS
 
 //* CREATE
-export const registerUserAPI = async (data, setIsLoading) => {
+export const createNewUserAPI = async (data, setIsLoading) => {
 	try {
 		const response = await axios.post(ENDPOINT_ACCOUNT, data, {
 			withCredentials: false,
@@ -26,7 +27,7 @@ export const registerUserAPI = async (data, setIsLoading) => {
 	}
 };
 
-export const getAuthorizationAPI = async (data, setIsLoading) => {
+export const createAuthorizationAPI = async (data, setIsLoading) => {
 	try {
 		const response = await axios.post(ENDPOINT_AUTH, data, {
 			withCredentials: false,
@@ -64,6 +65,37 @@ export const createListingAPI = async (data, setIsLoading, token, dispatch) => {
 	}
 };
 
+export const createReservationAPI = async (
+	listingID,
+	dateRange,
+	token,
+	setIsReservating
+) => {
+	try {
+		console.log(dateRange);
+		setIsReservating(true);
+		await axios.post(
+			ENDPOINT_RESERVATION,
+			{
+				listingID,
+				start_date: dateRange.startDate,
+				end_date: dateRange.endDate,
+			},
+			{
+				headers: {
+					Authorization: `Token ${token}`,
+				},
+			}
+		);
+		toast.success('Reservation is made!', toastOptions);
+	} catch (error) {
+		console.log(error);
+		toast.error('Could not create reservation', toastOptions);
+	} finally {
+		setIsReservating(false);
+	}
+};
+
 //* READ
 export const getUserInformationAPI = async (token) => {
 	try {
@@ -79,7 +111,7 @@ export const getUserInformationAPI = async (token) => {
 	}
 };
 
-export const readListingAPI = async (
+export const getListingAPI = async (
 	token,
 	dispatch,
 	setIsLoading,
@@ -116,6 +148,26 @@ export const getListingInformationAPI = async (
 			},
 		});
 		setListing(response.data);
+	} catch (error) {
+		toast.error('Something very wrong happened!', toastOptions);
+	}
+};
+
+export const getListingReservationsAPI = async (
+	listingID,
+	token,
+	setReservations
+) => {
+	try {
+		const response = await axios.get(
+			`${ENDPOINT_RESERVATION}?listingID=${listingID}`,
+			{
+				headers: {
+					Authorization: `Token ${token}`,
+				},
+			}
+		);
+		setReservations(response.data);
 	} catch (error) {
 		toast.error('Something very wrong happened!', toastOptions);
 	}
