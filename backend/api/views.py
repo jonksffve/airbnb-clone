@@ -152,6 +152,11 @@ class ListingRetrieveView(RetrieveAPIView):
 
 
 class ReservationListCreateView(ListCreateAPIView):
+    """
+    View that creates OR lists all reservations to a given listing
+    @ permissions: user needs to be authenticated
+    @ accepts: [GET, POST]
+    """
     permission_classes = [IsAuthenticated]
     queryset = None
     serializer_class = ReservationSerializer
@@ -177,7 +182,7 @@ class ReservationListCreateView(ListCreateAPIView):
         # Try to get full data from front-end
         try:
             data = {
-                "listing": request.data['listing'],
+                "listing": request.data['listingID'],
                 "user": request.user.id,
                 "start_date": request.data['start_date'],
                 "end_date": request.data['end_date'],

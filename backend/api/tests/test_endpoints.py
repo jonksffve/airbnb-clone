@@ -36,7 +36,7 @@ class AccountTests(TestSetUp):
 
         # Succesfully create an object
         response = self.client.post(self.reservation_endpoint, {
-            "listing": self.listing.id,
+            "listingID": self.listing.id,
             "start_date": now() + timedelta(9),
             "end_date": now() + timedelta(14),
         }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
