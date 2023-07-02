@@ -5,7 +5,7 @@ import ListingCategory from './ListingCategory';
 import MapDisplay from '../MapDisplay';
 
 const ListingInfo = ({
-	user,
+	creator,
 	category,
 	description,
 	roomCount,
@@ -27,8 +27,10 @@ const ListingInfo = ({
                 text-xl
                 font-semibold'
 				>
-					<div>Hosted by {user?.name}</div>
-					<Avatar avatar={user?.image} />
+					<div>
+						Hosted by {creator?.first_name} {creator?.last_name}
+					</div>
+					<Avatar avatar={creator?.avatar} />
 				</div>
 				<div className='flex flex-row items-center gap-4 font-light text-neutral-500'>
 					<div>{guestCount} guests</div>
