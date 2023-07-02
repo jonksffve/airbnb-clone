@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import Button from '../UIhelpers/Button';
 import { FcGoogle } from 'react-icons/fc';
 import { AiFillGithub } from 'react-icons/ai';
-import { getAuthorizationAPI } from '../../api/AuthAPI';
+import { createAuthorizationAPI } from '../../api/AuthAPI';
 
 const LoginModal = () => {
 	const uiState = useSelector((state) => state.ui);
@@ -30,7 +30,7 @@ const LoginModal = () => {
 
 	const onSubmit = async (data) => {
 		setIsLoading(true);
-		const response = await getAuthorizationAPI(data, setIsLoading);
+		const response = await createAuthorizationAPI(data, setIsLoading);
 
 		if (response.status === 200) {
 			const { token, user } = response.data;

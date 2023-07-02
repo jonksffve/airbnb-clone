@@ -8,7 +8,7 @@ import Input from '../UIhelpers/Inputs/Input';
 import Button from '../UIhelpers/Button';
 import { FcGoogle } from 'react-icons/fc';
 import { AiFillGithub } from 'react-icons/ai';
-import { registerUserAPI } from '../../api/AuthAPI';
+import { createNewUserAPI } from '../../api/AuthAPI';
 
 const RegisterModal = () => {
 	const uiState = useSelector((state) => state.ui);
@@ -32,7 +32,7 @@ const RegisterModal = () => {
 
 	const onSubmit = async (data) => {
 		setIsLoading(true);
-		const response = await registerUserAPI(data, setIsLoading);
+		const response = await createNewUserAPI(data, setIsLoading);
 
 		if (response.status === 400) {
 			const errors = Object.entries(response.data);
