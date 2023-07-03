@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import MainNavigation from '../../../components/Menu/Navbar';
 import RegisterModal from '../../../components/Modals/RegisterModal';
@@ -40,7 +40,7 @@ const RootLayout = () => {
 	return (
 		<div className='flex h-[100vh] flex-col'>
 			<MainNavigation />
-			<main className='p-5'>
+			<main>
 				<Outlet />
 			</main>
 			<RentModal />

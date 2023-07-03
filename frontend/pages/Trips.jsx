@@ -10,8 +10,6 @@ import ListingCard from '../components/Listings/ListingCard';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../components/UIhelpers/Spinner';
 
-useSelector;
-
 const Trips = () => {
 	const [tripsData, setTripsData] = useState([]);
 	const [isLoading, setIsLoading] = useState(undefined);

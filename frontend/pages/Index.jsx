@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getListingAPI } from '../api/AuthAPI';
 import { useSelector } from 'react-redux';
@@ -6,6 +6,7 @@ import Container from '../components/UIhelpers/Container';
 import IsEmpty from '../components/Listings/IsEmpty';
 import ListingCard from '../components/Listings/ListingCard';
 import Spinner from '../components/UIhelpers/Spinner';
+import Categories from '../components/Menu/Categories';
 
 const Index = () => {
 	const user = useSelector((state) => state.user);
@@ -33,11 +34,15 @@ const Index = () => {
 	}
 
 	return (
-		<Container>
-			{isLoading && <Spinner />}
-			{!isLoading && (
-				<div
-					className='grid
+		<Fragment>
+			<div className='mb-5 w-full bg-white shadow-sm'>
+				<Categories />
+			</div>
+			<Container>
+				{isLoading && <Spinner />}
+				{!isLoading && (
+					<div
+						className='grid
 							grid-cols-1
 							gap-8
 							sm:grid-cols-2
@@ -45,17 +50,18 @@ const Index = () => {
 							lg:grid-cols-4
 							xl:grid-cols-5
 							2xl:grid-cols-6'
-				>
-					{listings.map((item) => (
-						<ListingCard
-							key={item.id}
-							data={item}
-							token={user.token}
-						/>
-					))}
-				</div>
-			)}
-		</Container>
+					>
+						{listings.map((item) => (
+							<ListingCard
+								key={item.id}
+								data={item}
+								token={user.token}
+							/>
+						))}
+					</div>
+				)}
+			</Container>
+		</Fragment>
 	);
 };
 
