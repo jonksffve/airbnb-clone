@@ -14,6 +14,7 @@ import {
 //* CREATE
 export const createNewUserAPI = async (data, setIsLoading) => {
 	try {
+		setIsLoading(true);
 		const response = await axios.post(ENDPOINT_ACCOUNT, data, {
 			withCredentials: false,
 		});
@@ -29,6 +30,7 @@ export const createNewUserAPI = async (data, setIsLoading) => {
 
 export const createAuthorizationAPI = async (data, setIsLoading) => {
 	try {
+		setIsLoading(true);
 		const response = await axios.post(ENDPOINT_AUTH, data, {
 			withCredentials: false,
 		});
@@ -44,6 +46,7 @@ export const createAuthorizationAPI = async (data, setIsLoading) => {
 
 export const createListingAPI = async (data, setIsLoading, token, dispatch) => {
 	try {
+		setIsLoading(true);
 		const response = await axios.postForm(ENDPOINT_LISTING, data, {
 			withCredentials: false,
 			headers: {
@@ -52,7 +55,6 @@ export const createListingAPI = async (data, setIsLoading, token, dispatch) => {
 			},
 		});
 		toast.success('Listing created!', toastOptions);
-		setIsLoading(false);
 		dispatch({ listing: response.data });
 		return response;
 	} catch (error) {
@@ -62,6 +64,8 @@ export const createListingAPI = async (data, setIsLoading, token, dispatch) => {
 			}
 		}
 		return error.response;
+	} finally {
+		setIsLoading(false);
 	}
 };
 
@@ -72,7 +76,6 @@ export const createReservationAPI = async (
 	setIsReservating
 ) => {
 	try {
-		console.log(dateRange);
 		setIsReservating(true);
 		await axios.post(
 			ENDPOINT_RESERVATION,
@@ -118,6 +121,7 @@ export const getListingAPI = async (
 	setIsEmpty
 ) => {
 	try {
+		setIsLoading(true);
 		const response = await axios.get(ENDPOINT_LISTING, {
 			withCredentials: false,
 			headers: {
@@ -125,14 +129,14 @@ export const getListingAPI = async (
 				Authorization: `Token ${token}`,
 			},
 		});
-		setIsLoading(false);
 		dispatch({ listings: response.data });
 		setIsEmpty(response.data.length === 0);
 	} catch (error) {
-		setIsLoading(false);
 		dispatch({ listings: [] });
 		setIsEmpty(true);
 		toast.error('Something happened, fetching data.', toastOptions);
+	} finally {
+		setIsLoading(false);
 	}
 };
 
@@ -154,22 +158,29 @@ export const getListingInformationAPI = async (
 };
 
 export const getListingReservationsAPI = async (
-	listingID,
 	token,
-	setReservations
+	setData,
+	setIsLoading,
+	listingID = undefined
 ) => {
 	try {
-		const response = await axios.get(
-			`${ENDPOINT_RESERVATION}?listingID=${listingID}`,
-			{
-				headers: {
-					Authorization: `Token ${token}`,
-				},
-			}
-		);
-		setReservations(response.data);
+		setIsLoading(true);
+		let url = ENDPOINT_RESERVATION;
+
+		if (listingID) {
+			url += `?listingID=${listingID}`;
+		}
+
+		const response = await axios.get(url, {
+			headers: {
+				Authorization: `Token ${token}`,
+			},
+		});
+		setData(response.data);
 	} catch (error) {
 		toast.error('Something very wrong happened!', toastOptions);
+	} finally {
+		setIsLoading(false);
 	}
 };
 
