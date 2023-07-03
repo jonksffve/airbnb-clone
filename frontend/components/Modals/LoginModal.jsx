@@ -28,6 +28,11 @@ const LoginModal = () => {
 		},
 	});
 
+	const handleClose = useCallback(() => {
+		dispatch(uiActions.closeLoginModal());
+		reset();
+	}, [dispatch, reset]);
+
 	const onSubmit = useCallback(
 		async (data) => {
 			const response = await createAuthorizationAPI(data, setIsLoading);
@@ -50,11 +55,6 @@ const LoginModal = () => {
 		},
 		[dispatch, handleClose]
 	);
-
-	const handleClose = useCallback(() => {
-		dispatch(uiActions.closeLoginModal());
-		reset();
-	}, [dispatch, reset]);
 
 	const bodyContent = (
 		<div className='flex flex-col gap-4'>

@@ -30,6 +30,11 @@ const RegisterModal = () => {
 		},
 	});
 
+	const handleClose = useCallback(() => {
+		dispatch(uiActions.closeRegisterModal());
+		reset();
+	}, [dispatch, reset]);
+
 	const onSubmit = useCallback(
 		async (data) => {
 			const response = await createNewUserAPI(data, setIsLoading);
@@ -47,11 +52,6 @@ const RegisterModal = () => {
 		},
 		[handleClose, setError]
 	);
-
-	const handleClose = useCallback(() => {
-		dispatch(uiActions.closeRegisterModal());
-		reset();
-	}, [dispatch, reset]);
 
 	const bodyContent = (
 		<div className='flex flex-col gap-4'>
