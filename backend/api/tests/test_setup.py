@@ -53,9 +53,13 @@ class TestSetUp(APITransactionTestCase):
         self.reservation = ReservationListing.objects.create(
             listing=self.listing, user=self.first_user_obj, start_date=(now() + timedelta(1)), end_date=(now() + timedelta(8)))
 
-        # 1 Authenticated user to check permissions
+        # 2 Authenticated users to check permissions
         self.authenticated_user = self.client.post(self.auth_endpoint, {
             'username': 'normal@user.com',
+            'password': 'foo123'
+        }).data
+        self.authenticated_second_user = self.client.post(self.auth_endpoint, {
+            'username': 'normal2@user.com',
             'password': 'foo123'
         }).data
 
