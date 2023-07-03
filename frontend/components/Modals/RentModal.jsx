@@ -14,6 +14,7 @@ import { createListingAPI } from '../../api/AuthAPI';
 import Spinner from '../UIhelpers/Spinner';
 import { getCategories } from '../../hooks/Categories';
 import { useNavigate } from 'react-router-dom';
+import { ROUTE_HOME } from '../../config/apiRoutesConfig';
 
 const STEPS = {
 	CATEGORY: 0,
@@ -91,7 +92,7 @@ const RentModal = () => {
 			reset();
 			dispatch(uiActions.closeRentModal());
 			setStep(STEPS.CATEGORY);
-			navigate(0);
+			navigate(ROUTE_HOME);
 		}
 	};
 
