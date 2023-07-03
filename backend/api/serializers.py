@@ -34,7 +34,7 @@ class FavoriteSerializer(ModelSerializer):
         fields = ['id', 'listing', 'user']
 
 
-class ReservationSerializer(ModelSerializer):
+class ReservationCreateSerializer(ModelSerializer):
     class Meta:
         model = ReservationListing
         fields = ['listing', 'user', 'start_date', 'end_date']
@@ -75,3 +75,12 @@ class ReservationSerializer(ModelSerializer):
                 {'start_date': 'Reservation can not be made for past dates.'})
 
         return value
+
+
+class ReservationListSerializer(ModelSerializer):
+    listing = ListingSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ReservationListing
+        fields = ['id', 'listing', 'user', 'start_date', 'end_date']
