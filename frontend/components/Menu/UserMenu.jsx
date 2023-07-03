@@ -5,11 +5,19 @@ import MenuItem from './MenuItem';
 import { useDispatch, useSelector } from 'react-redux';
 import { uiActions } from '../../store/ui-slice';
 import { userActions } from '../../store/user-slice';
+import { useNavigate } from 'react-router-dom';
+import {
+	ROUTE_FAVORITES,
+	ROUTE_PROPERTIES,
+	ROUTE_RESERVATIONS,
+	ROUTE_TRIPS,
+} from '../../config/apiRoutesConfig';
 
 const UserMenu = () => {
 	const user = useSelector((state) => state.user);
 	const [isOpen, setIsOpen] = useState(false);
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 
 	const toggleOpen = useCallback(() => {
 		setIsOpen(!isOpen);
@@ -46,24 +54,28 @@ const UserMenu = () => {
 						<div className='flex cursor-pointer flex-col'>
 							<MenuItem
 								onClick={() => {
+									navigate(ROUTE_TRIPS);
 									toggleOpen();
 								}}
 								label='My trips'
 							/>
 							<MenuItem
 								onClick={() => {
+									navigate(ROUTE_FAVORITES);
 									toggleOpen();
 								}}
 								label='My favorites'
 							/>
 							<MenuItem
 								onClick={() => {
+									navigate(ROUTE_RESERVATIONS);
 									toggleOpen();
 								}}
 								label='My reservations'
 							/>
 							<MenuItem
 								onClick={() => {
+									navigate(ROUTE_PROPERTIES);
 									toggleOpen();
 								}}
 								label='My properties'
