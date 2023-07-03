@@ -11,8 +11,8 @@ import { AiFillGithub } from 'react-icons/ai';
 import { createNewUserAPI } from '../../api/AuthAPI';
 
 const RegisterModal = () => {
-	const uiState = useSelector((state) => state.ui);
 	const dispatch = useDispatch();
+	const uiState = useSelector((state) => state.ui);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const {
@@ -30,21 +30,23 @@ const RegisterModal = () => {
 		},
 	});
 
-	const onSubmit = async (data) => {
-		setIsLoading(true);
-		const response = await createNewUserAPI(data, setIsLoading);
+	const onSubmit = useCallback(
+		async (data) => {
+			const response = await createNewUserAPI(data, setIsLoading);
 
-		if (response.status === 400) {
-			const errors = Object.entries(response.data);
-			for (const [key, value] of errors) {
-				setError(key, { type: 'custom', message: [...value] });
+			if (response.status === 400) {
+				const errors = Object.entries(response.data);
+				for (const [key, value] of errors) {
+					setError(key, { type: 'custom', message: [...value] });
+				}
 			}
-		}
 
-		if (response.status === 201) {
-			handleClose();
-		}
-	};
+			if (response.status === 201) {
+				handleClose();
+			}
+		},
+		[handleClose, setError]
+	);
 
 	const handleClose = useCallback(() => {
 		dispatch(uiActions.closeRegisterModal());

@@ -28,26 +28,28 @@ const LoginModal = () => {
 		},
 	});
 
-	const onSubmit = async (data) => {
-		setIsLoading(true);
-		const response = await createAuthorizationAPI(data, setIsLoading);
+	const onSubmit = useCallback(
+		async (data) => {
+			const response = await createAuthorizationAPI(data, setIsLoading);
 
-		if (response.status === 200) {
-			const { token, user } = response.data;
-			handleClose();
-			dispatch(
-				userActions.loginUser({
-					token: token,
-					userID: user.id,
-					first_name: user.first_name,
-					last_name: user.last_name,
-					email: user.email,
-					avatar: user.avatar,
-				})
-			);
-			localStorage.setItem('auth_token', token);
-		}
-	};
+			if (response.status === 200) {
+				const { token, user } = response.data;
+				handleClose();
+				dispatch(
+					userActions.loginUser({
+						token: token,
+						userID: user.id,
+						first_name: user.first_name,
+						last_name: user.last_name,
+						email: user.email,
+						avatar: user.avatar,
+					})
+				);
+				localStorage.setItem('auth_token', token);
+			}
+		},
+		[dispatch, handleClose]
+	);
 
 	const handleClose = useCallback(() => {
 		dispatch(uiActions.closeLoginModal());
