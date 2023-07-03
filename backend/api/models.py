@@ -24,11 +24,11 @@ class Listing(models.Model):
     price = models.DecimalField(
         max_digits=6, decimal_places=2, blank=False, null=False, validators=[MinValueValidator(1)])
     guestCount = models.SmallIntegerField(
-        _("Guests"), blank=False, null=False, validators=[MinValueValidator(1)])
+        _("Guests count"), blank=False, null=False, validators=[MinValueValidator(1)])
     roomCount = models.SmallIntegerField(
-        _("Guests"), blank=False, null=False, validators=[MinValueValidator(1)])
+        _("Room count"), blank=False, null=False, validators=[MinValueValidator(1)])
     bathroomCount = models.SmallIntegerField(
-        _("Guests"), blank=False, null=False, validators=[MinValueValidator(1)])
+        _("Bathroom count"), blank=False, null=False, validators=[MinValueValidator(1)])
     location = models.CharField(
         _("Location"), max_length=50, blank=False, null=False)
     created_at = models.DateTimeField(_("Date"), auto_now_add=True, blank=True)
