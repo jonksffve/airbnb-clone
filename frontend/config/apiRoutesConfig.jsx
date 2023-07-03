@@ -6,7 +6,7 @@ export const ENDPOINT_RESERVATION = 'http://localhost:8000/api/reservation/';
 export const ENDPOINT_FAVORITE = 'http://localhost:8000/api/listing/favorite/';
 //APPLICATION URLS ROUTES
 export const ROUTE_HOME = '/';
-export const ROUTE_TRIPS = 'trips/';
-export const ROUTE_FAVORITES = 'favorites/';
-export const ROUTE_RESERVATIONS = 'reservations/';
-export const ROUTE_PROPERTIES = 'properties/';
+export const ROUTE_TRIPS = '/trips/';
+export const ROUTE_FAVORITES = '/favorites/';
+export const ROUTE_RESERVATIONS = '/reservations/';
+export const ROUTE_PROPERTIES = '/properties/';
