@@ -12,8 +12,8 @@ import ImagesUploadInput from '../UIhelpers/Inputs/ImagesUploadInput';
 import Input from '../UIhelpers/Inputs/Input';
 import { createListingAPI } from '../../api/AuthAPI';
 import Spinner from '../UIhelpers/Spinner';
-import { listingsActions } from '../../store/listings-slice';
 import { getCategories } from '../../hooks/Categories';
+import { useNavigate } from 'react-router-dom';
 
 const STEPS = {
 	CATEGORY: 0,
@@ -28,6 +28,7 @@ const RentModal = () => {
 	const userState = useSelector((state) => state.user);
 	const uiState = useSelector((state) => state.ui);
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const [step, setStep] = useState(STEPS.CATEGORY);
 	const [isLoading, setIsLoading] = useState(false);
 	const [country, setCountry] = useState(undefined);
@@ -83,16 +84,14 @@ const RentModal = () => {
 		const response = await createListingAPI(
 			data,
 			setIsLoading,
-			userState.token,
-			(value) => {
-				dispatch(listingsActions.appendListing(value));
-			}
+			userState.token
 		);
 
 		if (response.status === 201) {
 			reset();
 			dispatch(uiActions.closeRentModal());
 			setStep(STEPS.CATEGORY);
+			navigate(0);
 		}
 	};
 

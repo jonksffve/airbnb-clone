@@ -1,17 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getListingAPI } from '../api/AuthAPI';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Container from '../components/UIhelpers/Container';
 import IsEmpty from '../components/Listings/IsEmpty';
 import ListingCard from '../components/Listings/ListingCard';
-import { listingsActions } from '../store/listings-slice';
 
 const Index = () => {
 	const user = useSelector((state) => state.user);
-	const listings = useSelector((state) => state.listings);
-	const dispatch = useDispatch();
-
+	const [listings, setListings] = useState([]);
 	const [isLoading, setIsLoading] = useState(undefined);
 	const [isEmpty, setIsEmpty] = useState(undefined);
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -22,15 +19,8 @@ const Index = () => {
 
 	useMemo(() => {
 		if (!user.token) return;
-		getListingAPI(
-			user.token,
-			(value) => {
-				dispatch(listingsActions.addListings(value));
-			},
-			setIsLoading,
-			setIsEmpty
-		);
-	}, [user.token, dispatch]);
+		getListingAPI(user.token, setListings, setIsLoading, setIsEmpty);
+	}, [user.token]);
 
 	if (isEmpty) {
 		return (
@@ -53,7 +43,7 @@ const Index = () => {
 							xl:grid-cols-5
 							2xl:grid-cols-6'
 			>
-				{listings.listings.map((item) => (
+				{listings.map((item) => (
 					<ListingCard
 						key={item.id}
 						data={item}
