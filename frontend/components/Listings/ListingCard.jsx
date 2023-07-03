@@ -11,8 +11,10 @@ const ListingCard = ({
 	isReservation = false,
 	onCancel,
 	actionID,
+	isLoading,
 }) => {
 	const fullLocation = getByValue(data.location);
+
 	const reservationDate = useMemo(() => {
 		if (!isReservation) return undefined;
 
@@ -53,8 +55,9 @@ const ListingCard = ({
 				</div>
 				{isReservation && new Date(data.end_date) > new Date() && (
 					<Button
+						disabled={isLoading}
 						small
-						label='Cancel'
+						label='Cancel reservation'
 						onClick={() => {
 							onCancel(actionID);
 						}}
