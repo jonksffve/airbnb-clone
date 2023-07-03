@@ -24,10 +24,11 @@ class AccountTests(TestSetUp):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # We're filtering the data based on listings:
-        # Returns http400 if we don't attach "listingID" as query_params
+        # Returns all user's reservations if we don't attach a proper request param
+        # Assumes its a regular GET ALL reservations!
         response = self.client.get(f'{self.reservation_endpoint}?listing=123',
                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Returns http404 if listing does not exists
         response = self.client.get(f'{self.reservation_endpoint}?listingID=123',
@@ -113,6 +114,35 @@ class AccountTests(TestSetUp):
         }, format='json', HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(ReservationListing.objects.count(), 3)
+
+    def test_reservation_destroy_endpoint(self):
+        """
+        Basic testing to ensure the functionality of this endpoint
+        @permission: Needs to be authenticated
+        @permission: User loggedin must be the owner (this is done by limiting the queryset)
+        @accepts: [DELETE]
+        """
+        # authentication
+        response = self.client.delete(
+            f'{self.reservation_endpoint}{self.reservation.id}/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # trying to delete another reservation
+        response = self.client.delete(f'{self.reservation_endpoint}{self.reservation.id}/',
+                                      format="json", HTTP_AUTHORIZATION=f'Token {self.authenticated_second_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # actual deletion
+        self.assertEqual(ReservationListing.objects.count(), 1)
+        response = self.client.delete(f'{self.reservation_endpoint}{self.reservation.id}/',
+                                      format="json", HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(ReservationListing.objects.count(), 0)
+
+        # wrong id?
+        response = self.client.delete(f'{self.reservation_endpoint}{self.reservation.id}/',
+                                      format="json", HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_account_endpoint(self):
         """
