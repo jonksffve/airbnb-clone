@@ -11,7 +11,11 @@ from rest_framework.exceptions import ParseError
 # from .permissions import IsOwnerOrStaff (deprecated, is done by QuerySets now)
 
 from accounts.serializers import UserSerializer, TokenSerializer
-from .serializers import ListingSerializer, FavoriteSerializer, ReservationSerializer
+from .serializers import (
+    ListingSerializer,
+    FavoriteSerializer,
+    ReservationCreateSerializer,
+    ReservationListSerializer)
 
 from django.utils.timezone import now
 from django.shortcuts import get_object_or_404
@@ -153,28 +157,33 @@ class ListingRetrieveView(RetrieveAPIView):
 
 class ReservationListCreateView(ListCreateAPIView):
     """
-    View that creates OR lists all reservations to a given listing
+    View that will attempt to create a Reservation if POST
+    OR get all reservations on a listing (if listingID provided) or return all user reservations (no params)
     @ permissions: user needs to be authenticated
     @ accepts: [GET, POST]
     """
     permission_classes = [IsAuthenticated]
     queryset = None
-    serializer_class = ReservationSerializer
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method == "GET":
+            # Used for listing nested relationship information such as (user) and (listing)
+            return ReservationListSerializer
+        # Has validations on the date fields logic!
+        return ReservationCreateSerializer
 
     def get_queryset(self):
-        # We need query to have listingID so we can filter down the data
-        # Returns 400 if we cant find it attached to the request
-        try:
-            listingID = self.request.query_params['listingID']
-        except:
-            raise ParseError
-
-        # We attemp to get the real listing object or 404
-        listing = get_object_or_404(Listing, pk=listingID)
-
-        # Filtering data to both: "listing" and "active" reservations
-        queryset = ReservationListing.objects.filter(
-            listing=listing, end_date__gte=now())
+        # IF we need reservations on a particular listing we first attempt to get that ID
+        if 'listingID' in self.request.query_params:
+            # We raise 404 is provided listing is not accurate for a particular listing
+            listing = get_object_or_404(
+                Listing, pk=self.request.query_params['listingID'])
+            queryset = ReservationListing.objects.filter(
+                listing=listing, end_date__gte=now())
+        else:
+            # IF we fail to get listingID we then return all of the authenticated user's reservations
+            queryset = ReservationListing.objects.filter(
+                user=self.request.user)
 
         return queryset
 
@@ -195,3 +204,13 @@ class ReservationListCreateView(ListCreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class ReservationDestroyView(DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = None
+    serializer_class = ReservationListSerializer
+
+    def get_queryset(self):
+        # We make sure to filter the data based on loggedin user, so he is the owner!
+        return ReservationListing.objects.filter(user=self.request.user)
