@@ -3,6 +3,7 @@ import RootLayout from './layouts/RootLayout';
 import Index from '../../pages/Index';
 import ListingDetail from '../../pages/ListingDetail';
 import Trips from '../../pages/Trips';
+import Favorites from '../../pages/Favorites';
 
 export const router = createBrowserRouter([
 	{
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'favorites/',
-				element: <h2>My favorites</h2>,
+				element: <Favorites />,
 			},
 			{
 				path: 'reservations/',
