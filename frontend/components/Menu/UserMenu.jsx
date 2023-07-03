@@ -49,7 +49,7 @@ const UserMenu = () => {
 				</div>
 			</div>
 			{isOpen && (
-				<div className='absolute right-0 top-12 w-[40vw] overflow-hidden rounded-xl bg-white text-sm shadow-md md:w-3/4'>
+				<div className='absolute right-0 top-12 z-50 w-[40vw] overflow-hidden rounded-xl bg-white text-sm shadow-md md:w-3/4'>
 					{user.loggedIn && (
 						<div className='flex cursor-pointer flex-col'>
 							<MenuItem
@@ -85,7 +85,7 @@ const UserMenu = () => {
 									toggleOpen();
 									onRent();
 								}}
-								label='Airbnb my home'
+								label='Air my home'
 							/>
 							<hr />
 							<MenuItem
