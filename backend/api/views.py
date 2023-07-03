@@ -13,7 +13,8 @@ from rest_framework.exceptions import ParseError
 from accounts.serializers import UserSerializer, TokenSerializer
 from .serializers import (
     ListingSerializer,
-    FavoriteSerializer,
+    FavoriteCreateSerializer,
+    FavoriteListSerializer,
     ReservationCreateSerializer,
     ReservationListSerializer)
 
@@ -99,15 +100,23 @@ class ListingCreateListView(ListCreateAPIView):
         serializer.save(creator=self.request.user, category=category_obj)
 
 
-class FavoriteCreateView(CreateAPIView):
+class FavoriteCreateListView(ListCreateAPIView):
     """
-    Creates a new model instance of FavoriteListing
+    View that will create/list favorite instances based on request.method
     @ permissions: user needs to be authenticated
-    @ accepts: [POST]
+    @ accepts: [GET, POST]
     """
     permission_classes = [IsAuthenticated]
-    queryset = FavoriteListing.objects.all()
-    serializer_class = FavoriteSerializer
+    queryset = None
+    serializer_class = None
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return FavoriteListSerializer
+        return FavoriteCreateSerializer
+
+    def get_queryset(self):
+        return FavoriteListing.objects.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
         # Make sure listingID is passed or 400
@@ -136,7 +145,7 @@ class FavoriteDestroyView(DestroyAPIView):
     """
     permission_classes = [IsAuthenticated]
     queryset = None
-    serializer_class = FavoriteSerializer
+    serializer_class = FavoriteListSerializer
     lookup_field = 'listing'
 
     def get_queryset(self):
