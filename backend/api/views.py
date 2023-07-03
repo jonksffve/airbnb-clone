@@ -18,10 +18,11 @@ from .serializers import (
     ReservationCreateSerializer,
     ReservationListSerializer)
 
+from .models import Listing, Category, FavoriteListing, ReservationListing
+
 from django.utils.timezone import now
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from .models import Listing, Category, FavoriteListing, ReservationListing
 
 # Get the current User model
 user_model = get_user_model()
@@ -34,6 +35,18 @@ class UserCreateView(CreateAPIView):
     """
     queryset = user_model.objects.all()
     serializer_class = UserSerializer
+
+
+class UserRetrieveView(RetrieveAPIView):
+    """
+    Retrieve a single user information with the provided Token authentication value.
+    @permissions: user needs to be authenticated
+    @accepts: [GET]
+    """
+    permission_classes = [IsAuthenticated]
+    queryset = Token.objects.all()
+    serializer_class = TokenSerializer
+    lookup_field = 'key'
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -54,50 +67,6 @@ class CustomAuthToken(ObtainAuthToken):
             'token': token.key,
             'user': serializer.data
         })
-
-
-class UserRetrieveView(RetrieveAPIView):
-    """
-    Retrieve a single user information with the provided Token authentication value.
-    @permissions: user needs to be authenticated
-    @accepts: [GET]
-    """
-    permission_classes = [IsAuthenticated]
-    queryset = Token.objects.all()
-    serializer_class = TokenSerializer
-    lookup_field = 'key'
-
-
-class ListingCreateListView(ListCreateAPIView):
-    """
-    Creates a new instance OR returns list of objects, depending on the method.
-    @permissions: user needs to be authenticated
-    @accepts: [GET, POST]
-    @Raises 400, 404
-    """
-    permission_classes = [IsAuthenticated]
-    queryset = Listing.objects.all()
-    serializer_class = ListingSerializer
-
-    def create(self, request, *args, **kwargs):
-        # raises 400 if not given category in the body
-        try:
-            category_name = request.data['category']
-        except:
-            raise ParseError
-
-        # raises 404 if category doesnt exists
-        category_obj = get_object_or_404(
-            Category, name=category_name)
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer, category_obj)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def perform_create(self, serializer, category_obj):
-        serializer.save(creator=self.request.user, category=category_obj)
 
 
 class FavoriteCreateListView(ListCreateAPIView):
@@ -153,6 +122,43 @@ class FavoriteDestroyView(DestroyAPIView):
         return FavoriteListing.objects.filter(user=self.request.user)
 
 
+class ListingCreateListView(ListCreateAPIView):
+    """
+    Creates a new instance OR returns list of objects, depending on the method.
+    @permissions: user needs to be authenticated
+    @accepts: [GET, POST]
+    @Raises 400, 404
+    """
+    permission_classes = [IsAuthenticated]
+    queryset = None
+    serializer_class = ListingSerializer
+
+    def get_queryset(self):
+        if "user_only" in self.request.query_params:
+            return Listing.objects.filter(creator=self.request.user)
+        return Listing.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        # raises 400 if not given category in the body
+        try:
+            category_name = request.data['category']
+        except:
+            raise ParseError
+
+        # raises 404 if category doesnt exist
+        category_obj = get_object_or_404(
+            Category, name=category_name)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer, category_obj)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer, category_obj):
+        serializer.save(creator=self.request.user, category=category_obj)
+
+
 class ListingRetrieveView(RetrieveAPIView):
     """
     Retrieves a single instance of a Listing model
@@ -189,8 +195,12 @@ class ReservationListCreateView(ListCreateAPIView):
                 Listing, pk=self.request.query_params['listingID'])
             queryset = ReservationListing.objects.filter(
                 listing=listing, end_date__gte=now())
+        # Or IF we need reservations made on user's properties
+        elif 'user_properties' in self.request.query_params:
+            queryset = ReservationListing.objects.filter(
+                listing__creator=self.request.user, end_date__gte=now())
         else:
-            # IF we fail to get listingID we then return all of the authenticated user's reservations
+            # IF we fail to get listingID or user_properties we then return all of the authenticated user's reservations
             queryset = ReservationListing.objects.filter(
                 user=self.request.user)
 

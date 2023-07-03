@@ -23,12 +23,36 @@ class AccountTests(TestSetUp):
         response = self.client.get(self.reservation_endpoint)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        # We're filtering the data based on listings:
-        # Returns all user's reservations if we don't attach a proper request param
-        # Assumes its a regular GET ALL reservations!
+        # We're filtering the data based on query_params:
+        # @param listingID: Getting reservations of a particular listing
+        response = self.client.get(f'{self.reservation_endpoint}?listingID={self.listing.id}',
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+        # @param user_properties: Getting all reservations made in all user's registered properties
+        response = self.client.get(f'{self.reservation_endpoint}?user_properties',
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_second_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # second user has no properties!
+        self.assertEqual(len(response.data), 0)
+
+        response = self.client.get(f'{self.reservation_endpoint}?user_properties',
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # First object user has 1 property on which is an active reservation
+        self.assertEqual(len(response.data), 1)
+
+        # @no params or wrong params: Returns all user's reservations
         response = self.client.get(f'{self.reservation_endpoint}?listing=123',
                                    HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        # second obj user has no reservations
+        response = self.client.get(self.reservation_endpoint,
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_second_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
 
         # Returns http404 if listing does not exists
         response = self.client.get(f'{self.reservation_endpoint}?listingID=123',
@@ -220,7 +244,7 @@ class AccountTests(TestSetUp):
     def test_listing_endpoint(self):
         """
         Testing ListCreate endpoint
-        Endpoint used for both create and list all objects
+        Endpoint used for both create and list objects
         @ permission: needs authentication
         @ accepts [GET, POST]
         @ Raises 400,404
@@ -260,6 +284,17 @@ class AccountTests(TestSetUp):
             self.listing_endpoint, HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
         # make sure favorited is FALSE for 1st user
         self.assertFalse(response_first_user.data[0]['is_liked'])
+
+        # Theres only 1 listing created in setup (owned by first_user_obj)
+        # GET method should return [] with "user_only params"
+        response = self.client.get(
+            f'{self.listing_endpoint}?user_only', HTTP_AUTHORIZATION=f'Token {self.authenticated_second_user["token"]}')
+        self.assertEqual(len(response.data), 0)
+
+        # GET method should return 1 listing without any params
+        response = self.client.get(
+            self.listing_endpoint, HTTP_AUTHORIZATION=f'Token {self.authenticated_second_user["token"]}')
+        self.assertEqual(len(response.data), 2)
 
         # Testing situations in which we can't create
         # With empty title
@@ -352,6 +387,20 @@ class AccountTests(TestSetUp):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Permission: needs to be logged in
+        response = self.client.post(self.listing_endpoint,
+                                    data={
+                                        'title': 'I have title',
+                                        'description': 'This is my description',
+                                        'price': '25.50',
+                                        'guestCount': '2',
+                                        'roomCount': '3',
+                                        'bathroomCount': '2',
+                                        'category': 'Castillo',
+                                        'location': 'USA'},
+                                    format='json',
+                                    )
+        self.assertEqual(response.status_code,
+                         status.HTTP_401_UNAUTHORIZED)
         response = self.client.get(self.listing_endpoint)
         self.assertEqual(response.status_code,
                          status.HTTP_401_UNAUTHORIZED)
