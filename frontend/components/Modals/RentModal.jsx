@@ -80,7 +80,6 @@ const RentModal = () => {
 
 	const onSubmit = async (data) => {
 		if (step !== STEPS.PRICE) return onNext();
-		setIsLoading(true);
 		const response = await createListingAPI(
 			data,
 			setIsLoading,
@@ -95,8 +94,6 @@ const RentModal = () => {
 			dispatch(uiActions.closeRentModal());
 			setStep(STEPS.CATEGORY);
 		}
-
-		setIsLoading(false);
 	};
 
 	const handleClose = () => {

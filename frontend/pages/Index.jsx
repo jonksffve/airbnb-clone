@@ -22,7 +22,6 @@ const Index = () => {
 
 	useMemo(() => {
 		if (!user.token) return;
-		setIsLoading(true);
 		getListingAPI(
 			user.token,
 			(value) => {
