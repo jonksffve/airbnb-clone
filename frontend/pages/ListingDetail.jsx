@@ -2,7 +2,10 @@ import { useParams } from 'react-router-dom';
 import ListingHeader from '../components/Listings/ListingHeader';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { getListingInformationAPI } from '../api/AuthAPI';
+import {
+	getListingInformationAPI,
+	getListingReservationsAPI,
+} from '../api/AuthAPI';
 import Container from '../components/UIhelpers/Container';
 import ListingInfo from '../components/Listings/ListingInfo';
 import ListingReservation from '../components/Listings/ListingReservations';
@@ -10,12 +13,20 @@ import ListingReservation from '../components/Listings/ListingReservations';
 const ListingDetail = () => {
 	const { listingID } = useParams();
 	const [listing, setListing] = useState({});
+	const [reservations, setReservations] = useState([]);
 	const user = useSelector((state) => state.user);
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			if (!user.token) return;
 			await getListingInformationAPI(listingID, user.token, setListing);
+			await getListingReservationsAPI(
+				user.token,
+				setReservations,
+				setIsLoading,
+				listingID
+			);
 		};
 
 		fetchData();
@@ -41,7 +52,7 @@ const ListingDetail = () => {
 					md:gap-10'
 					>
 						<ListingInfo
-							user={user}
+							creator={listing.creator}
 							category={listing.category}
 							description={listing.description}
 							roomCount={listing.roomCount}
@@ -55,7 +66,12 @@ const ListingDetail = () => {
 						md:order-last
 						md:col-span-3'
 						>
-							<ListingReservation />
+							<ListingReservation
+								token={user.token}
+								listingID={listing.id}
+								price={listing.price}
+								reservations={reservations}
+							/>
 						</div>
 					</div>
 				</div>
