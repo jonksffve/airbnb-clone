@@ -183,11 +183,39 @@ export const getListingReservationsAPI = async (
 	}
 };
 
+export const getFavoritesAPI = async (
+	token,
+	setFavorites,
+	setIsLoading,
+	setIsEmpty
+) => {
+	try {
+		setIsLoading(true);
+		const response = await axios.get(ENDPOINT_FAVORITE, {
+			headers: {
+				Authorization: `Token ${token}`,
+			},
+		});
+		setFavorites(response.data);
+		setIsEmpty(response.data.length === 0);
+	} catch (error) {
+		setIsEmpty(true);
+		toast.error('Something happened fetching favorites.', toastOptions);
+	} finally {
+		setIsLoading(false);
+	}
+};
+
 //* UPDATE
 
 //* CREATE - DELETE
 
-export const favoriteAPI = async (listingID, token, liked, setLikeState) => {
+export const favoriteCreateDeleteAPI = async (
+	listingID,
+	token,
+	liked,
+	setLikeState
+) => {
 	try {
 		if (liked) {
 			await axios.delete(`${ENDPOINT_FAVORITE}${listingID}/`, {
@@ -212,5 +240,21 @@ export const favoriteAPI = async (listingID, token, liked, setLikeState) => {
 		setLikeState(!liked);
 	} catch (error) {
 		toast.error('Something happened.', toastOptions);
+	}
+};
+
+//* DELETE
+export const deleteReservationAPI = async (reservationID, token) => {
+	try {
+		await axios.delete(`${ENDPOINT_RESERVATION}${reservationID}/`, {
+			headers: {
+				Authorization: `Token ${token}`,
+			},
+		});
+	} catch (error) {
+		toast.error(
+			'Could not delete this reservation, call support.',
+			toastOptions
+		);
 	}
 };
