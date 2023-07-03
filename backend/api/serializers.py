@@ -28,7 +28,15 @@ class ListingSerializer(ModelSerializer):
         return False
 
 
-class FavoriteSerializer(ModelSerializer):
+class FavoriteCreateSerializer(ModelSerializer):
+    class Meta:
+        model = FavoriteListing
+        fields = ['listing', 'user']
+
+
+class FavoriteListSerializer(ModelSerializer):
+    listing = ListingSerializer(read_only=True)
+
     class Meta:
         model = FavoriteListing
         fields = ['id', 'listing', 'user']
