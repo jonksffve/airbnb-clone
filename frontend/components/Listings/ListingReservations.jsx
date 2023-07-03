@@ -5,6 +5,7 @@ import Button from '../UIhelpers/Button';
 import { eachDayOfInterval, add } from 'date-fns';
 import { createReservationAPI } from '../../api/AuthAPI';
 import { useNavigate } from 'react-router-dom';
+import { ROUTE_TRIPS } from '../../config/apiRoutesConfig';
 
 const ListingReservation = ({ reservations, price, listingID, token }) => {
 	const navigate = useNavigate();
@@ -24,7 +25,7 @@ const ListingReservation = ({ reservations, price, listingID, token }) => {
 			token,
 			setIsReservating
 		).then(() => {
-			navigate('/');
+			navigate(ROUTE_TRIPS);
 		});
 	}, [dateRange, listingID, token, navigate]);
 
