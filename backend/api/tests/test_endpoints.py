@@ -383,9 +383,9 @@ class AccountTests(TestSetUp):
 
     def test_favorite_endpoint(self):
         """
-        Test creation of user favoriting a particular listing
+        Test creation / retrieve of user favoriting a particular listing
         @ permissions: user needs to be authenticated
-        @ accepts: [POST]
+        @ accepts: [GET, POST]
         """
         # listing id needs to be in request body or 400
         response = self.client.post(self.listing_favorite_endpoint, {
@@ -414,10 +414,20 @@ class AccountTests(TestSetUp):
             self.assertEqual(FavoriteListing.objects.count(), 2)
 
         # authentication
+        # POST
         response = self.client.post(self.listing_favorite_endpoint, {
             "listingID": self.listing.id
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # GET
+        response = self.client.get(self.listing_favorite_endpoint)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # MAKING SURE WE CAN GET LIST OF FAVORITED BY USER
+        response = self.client.get(self.listing_favorite_endpoint,
+                                   HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['user'], self.first_user_obj.id)
 
     def test_favorite_destroy_endpoint(self):
         """
