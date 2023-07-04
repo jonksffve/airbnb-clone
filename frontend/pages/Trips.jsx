@@ -9,17 +9,27 @@ import {
 import ListingCard from '../components/Listings/ListingCard';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../components/UIhelpers/Spinner';
+import IsEmpty from '../components/Listings/IsEmpty';
 
 const Trips = () => {
 	const [tripsData, setTripsData] = useState([]);
 	const [isLoading, setIsLoading] = useState(undefined);
+	const [isEmpty, setIsEmpty] = useState(undefined);
 	const user = useSelector((state) => state.user);
 	const navigate = useNavigate();
 
 	useMemo(async () => {
 		if (!user.token) return;
-		await getListingReservationsAPI(user.token, setTripsData, setIsLoading);
-	}, [user.token]);
+		await getListingReservationsAPI(
+			user.token,
+			setTripsData,
+			setIsLoading,
+			null,
+			null
+		).then(() => {
+			setIsEmpty(tripsData.length === 0);
+		});
+	}, [user.token, tripsData.length]);
 
 	const handleCancel = useCallback(
 		async (reservationID) => {
@@ -29,6 +39,10 @@ const Trips = () => {
 		},
 		[user.token, navigate]
 	);
+
+	if (isEmpty) {
+		return <IsEmpty />;
+	}
 
 	return (
 		<Container>
@@ -60,10 +74,11 @@ const Trips = () => {
 									...trip.listing,
 								}}
 								token={user.token}
-								isReservation
-								onCancel={handleCancel}
 								actionID={trip.id}
 								isLoading={isLoading}
+								onAction={handleCancel}
+								actionLabel='Cancel reservation'
+								isReservation
 							/>
 						))}
 					</div>

@@ -13,10 +13,10 @@ import Spinner from '../components/UIhelpers/Spinner';
 
 const ListingDetail = () => {
 	const { listingID } = useParams();
-	const [listing, setListing] = useState({});
-	const [reservations, setReservations] = useState([]);
 	const user = useSelector((state) => state.user);
+	const [listing, setListing] = useState({});
 	const [isLoading, setIsLoading] = useState(undefined);
+	const [reservations, setReservations] = useState([]);
 
 	useMemo(async () => {
 		if (!user.token) return;

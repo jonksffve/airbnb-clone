@@ -19,9 +19,9 @@ const Index = () => {
 		setSearchParams({});
 	}, [setSearchParams]);
 
-	useMemo(() => {
+	useMemo(async () => {
 		if (!user.token) return;
-		getListingAPI(user.token, setListings, setIsLoading, setIsEmpty);
+		await getListingAPI(user.token, setListings, setIsLoading, setIsEmpty);
 	}, [user.token]);
 
 	if (isEmpty) {

@@ -11,7 +11,7 @@ const Favorites = () => {
 	const user = useSelector((state) => state.user);
 	const [favorites, setFavorites] = useState([]);
 	const [isLoading, setIsLoading] = useState(undefined);
-	const [isEmpty, setIsEmpty] = useState(false);
+	const [isEmpty, setIsEmpty] = useState(undefined);
 
 	useMemo(async () => {
 		if (!user.token) return;
@@ -19,12 +19,7 @@ const Favorites = () => {
 	}, [user.token]);
 
 	if (isEmpty) {
-		return (
-			<IsEmpty
-				onClick={() => {}}
-				showReset={() => {}}
-			/>
-		);
+		return <IsEmpty />;
 	}
 
 	return (

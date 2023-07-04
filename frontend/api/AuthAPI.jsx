@@ -115,23 +115,29 @@ export const getUserInformationAPI = async (token) => {
 
 export const getListingAPI = async (
 	token,
-	setListings,
+	setData,
 	setIsLoading,
-	setIsEmpty
+	setIsEmpty,
+	params = false
 ) => {
 	try {
 		setIsLoading(true);
-		const response = await axios.get(ENDPOINT_LISTING, {
-			withCredentials: false,
+
+		let url = ENDPOINT_LISTING;
+
+		if (params) {
+			url += '?user_only';
+		}
+
+		const response = await axios.get(url, {
 			headers: {
-				'content-type': 'multipart/form-data',
 				Authorization: `Token ${token}`,
 			},
 		});
-		setListings(response.data);
+		setData(response.data);
 		setIsEmpty(response.data.length === 0);
 	} catch (error) {
-		setListings([]);
+		setData([]);
 		setIsEmpty(true);
 		toast.error('Something happened, fetching data.', toastOptions);
 	} finally {
@@ -160,14 +166,20 @@ export const getListingReservationsAPI = async (
 	token,
 	setData,
 	setIsLoading,
-	listingID = undefined
+	listingID = undefined,
+	user_properties = undefined
 ) => {
 	try {
 		setIsLoading(true);
+
 		let url = ENDPOINT_RESERVATION;
 
 		if (listingID) {
 			url += `?listingID=${listingID}`;
+		}
+
+		if (user_properties) {
+			url += '?user_properties';
 		}
 
 		const response = await axios.get(url, {
@@ -177,7 +189,8 @@ export const getListingReservationsAPI = async (
 		});
 		setData(response.data);
 	} catch (error) {
-		toast.error('Something very wrong happened!', toastOptions);
+		setData([]);
+		toast.error('Could not fetch data, try again!', toastOptions);
 	} finally {
 		setIsLoading(false);
 	}
@@ -199,8 +212,9 @@ export const getFavoritesAPI = async (
 		setFavorites(response.data);
 		setIsEmpty(response.data.length === 0);
 	} catch (error) {
+		setFavorites([]);
 		setIsEmpty(true);
-		toast.error('Something happened fetching favorites.', toastOptions);
+		toast.error('Could not fetch data, try again!', toastOptions);
 	} finally {
 		setIsLoading(false);
 	}
@@ -244,17 +258,41 @@ export const favoriteCreateDeleteAPI = async (
 };
 
 //* DELETE
-export const deleteReservationAPI = async (reservationID, token) => {
+export const deleteReservationAPI = async (
+	reservationID,
+	token,
+	params = undefined
+) => {
 	try {
-		await axios.delete(`${ENDPOINT_RESERVATION}${reservationID}/`, {
+		let url = `${ENDPOINT_RESERVATION}${reservationID}/`;
+
+		if (params) {
+			url += '?is_owner';
+		}
+
+		await axios.delete(url, {
 			headers: {
 				Authorization: `Token ${token}`,
 			},
 		});
+		toast.error('Reservation deleted.', toastOptions);
 	} catch (error) {
 		toast.error(
 			'Could not delete this reservation, call support.',
 			toastOptions
 		);
+	}
+};
+
+export const deleteListingAPI = async (listingID, token) => {
+	try {
+		await axios.delete(`${ENDPOINT_LISTING}${listingID}/`, {
+			headers: {
+				Authorization: `Token ${token}`,
+			},
+		});
+		toast.success('Your property has been unlisted!', toastOptions);
+	} catch (error) {
+		toast.error('Something very wrong happened!', toastOptions);
 	}
 };
