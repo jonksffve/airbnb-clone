@@ -8,12 +8,13 @@ import Button from '../UIhelpers/Button';
 const ListingCard = ({
 	data,
 	token,
-	isReservation = false,
-	onCancel,
+	onAction,
 	actionID,
+	actionLabel,
 	isLoading,
+	isReservation = false,
 }) => {
-	const fullLocation = getByValue(data.location);
+	const fullLocation = getByValue(data?.location);
 
 	const reservationDate = useMemo(() => {
 		if (!isReservation) return undefined;
@@ -53,13 +54,13 @@ const ListingCard = ({
 					<div className='font-semibold'>$ {data.price}</div>
 					{!reservationDate && <div className='font-light'>/ night</div>}
 				</div>
-				{isReservation && new Date(data.end_date) > new Date() && (
+				{onAction && actionLabel && (
 					<Button
 						disabled={isLoading}
 						small
-						label='Cancel reservation'
+						label={actionLabel}
 						onClick={() => {
-							onCancel(actionID);
+							onAction(actionID);
 						}}
 					/>
 				)}
