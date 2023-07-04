@@ -4,6 +4,8 @@ import Index from '../../pages/Index';
 import ListingDetail from '../../pages/ListingDetail';
 import Trips from '../../pages/Trips';
 import Favorites from '../../pages/Favorites';
+import Reservations from '../../pages/Reservations';
+import Properties from '../../pages/Properties';
 
 export const router = createBrowserRouter([
 	{
@@ -28,11 +30,11 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'reservations/',
-				element: <h2>My reservations</h2>,
+				element: <Reservations />,
 			},
 			{
 				path: 'properties/',
-				element: <h2>My properties</h2>,
+				element: <Properties />,
 			},
 		],
 	},
