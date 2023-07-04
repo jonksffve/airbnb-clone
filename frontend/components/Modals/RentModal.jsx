@@ -1,4 +1,4 @@
-import Modal from '../UIhelpers/Modal';
+import Modal from './Modal';
 import { useDispatch, useSelector } from 'react-redux';
 import { uiActions } from '../../store/ui-slice';
 import { useMemo, useState } from 'react';

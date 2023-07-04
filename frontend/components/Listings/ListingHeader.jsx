@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { getByValue } from '../../hooks/WorldCountries';
 import Heading from '../Modals/Heading';
-import HeartButton from '../UIhelpers/HeartButton';
+import HeartButton from '../UIhelpers/Buttons/HeartButton';
 
 const ListingHeader = ({ title, image, locationValue, id, liked, token }) => {
 	const location = getByValue(locationValue);

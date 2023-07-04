@@ -1,5 +1,5 @@
 import Heading from '../Modals/Heading';
-import Button from '../UIhelpers/Button';
+import Button from '../UIhelpers/Buttons/Button';
 
 const IsEmpty = ({ onClick = undefined, showReset = undefined }) => {
 	return (

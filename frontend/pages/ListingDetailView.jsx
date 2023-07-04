@@ -6,12 +6,12 @@ import {
 	getListingInformationAPI,
 	getListingReservationsAPI,
 } from '../api/AuthAPI';
-import Container from '../components/UIhelpers/Container';
+import WrapperContent from '../components/UIhelpers/WrapperContent';
 import ListingInfo from '../components/Listings/ListingInfo';
 import ListingReservation from '../components/Listings/ListingReservations';
 import Spinner from '../components/UIhelpers/Spinner';
 
-const ListingDetail = () => {
+const ListingDetailView = () => {
 	const { listingID } = useParams();
 	const user = useSelector((state) => state.user);
 	const [listing, setListing] = useState({});
@@ -30,7 +30,7 @@ const ListingDetail = () => {
 	}, [listingID, user.token]);
 
 	return (
-		<Container>
+		<WrapperContent>
 			{isLoading && <Spinner />}
 			{!isLoading && (
 				<div className='mx-auto max-w-screen-lg'>
@@ -76,8 +76,8 @@ const ListingDetail = () => {
 					</div>
 				</div>
 			)}
-		</Container>
+		</WrapperContent>
 	);
 };
 
-export default ListingDetail;
+export default ListingDetailView;

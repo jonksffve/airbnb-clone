@@ -1,4 +1,4 @@
-import Container from '../UIhelpers/Container';
+import ContainerMenu from '../UIhelpers/ContainerMenu';
 import CategoryBox from './CategoryBox';
 import { useSearchParams } from 'react-router-dom';
 import { getCategories } from '../../hooks/Categories';
@@ -9,7 +9,7 @@ const Categories = () => {
 	const categories = getCategories();
 
 	return (
-		<Container>
+		<ContainerMenu>
 			<div
 				className='flex 
             flex-row 
@@ -27,7 +27,7 @@ const Categories = () => {
 					/>
 				))}
 			</div>
-		</Container>
+		</ContainerMenu>
 	);
 };
 

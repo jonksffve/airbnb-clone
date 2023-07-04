@@ -1,34 +1,39 @@
-import { useSelector } from 'react-redux';
-import Container from '../components/UIhelpers/Container';
 import { Fragment, useCallback, useMemo, useState } from 'react';
-import Spinner from '../components/UIhelpers/Spinner';
+import WrapperContent from '../components/UIhelpers/WrapperContent';
+import { useSelector } from 'react-redux';
+import {
+	deleteReservationAPI,
+	getListingReservationsAPI,
+} from '../api/AuthAPI';
 import Heading from '../components/Modals/Heading';
 import ListingCard from '../components/Listings/ListingCard';
-import { deleteListingAPI, getListingAPI } from '../api/AuthAPI';
+import Spinner from '../components/UIhelpers/Spinner';
 import IsEmpty from '../components/Listings/IsEmpty';
 import { useNavigate } from 'react-router-dom';
 
-const Properties = () => {
+const ReservationsView = () => {
 	const user = useSelector((state) => state.user);
-	const [properties, setProperties] = useState([]);
+	const [reservations, setReservations] = useState([]);
 	const [isLoading, setIsLoading] = useState(undefined);
 	const [isEmpty, setIsEmpty] = useState(undefined);
 	const navigate = useNavigate();
 
 	useMemo(async () => {
 		if (!user.token) return;
-		await getListingAPI(
+		await getListingReservationsAPI(
 			user.token,
-			setProperties,
+			setReservations,
 			setIsLoading,
-			setIsEmpty,
+			undefined,
 			true
-		);
-	}, [user.token]);
+		).then(() => {
+			setIsEmpty(reservations.length === 0);
+		});
+	}, [user.token, reservations.length]);
 
-	const handleDelete = useCallback(
+	const handleCancel = useCallback(
 		async (id) => {
-			await deleteListingAPI(id, user.token).then(() => {
+			await deleteReservationAPI(id, user.token, true).then(() => {
 				navigate(0);
 			});
 		},
@@ -40,13 +45,13 @@ const Properties = () => {
 	}
 
 	return (
-		<Container>
+		<WrapperContent>
 			{isLoading && <Spinner />}
 			{!isLoading && (
 				<Fragment>
 					<Heading
-						title='All your properties'
-						subtitle='These are all your listed properties'
+						title='All reservations made on your properties'
+						subtitle='Check them out'
 					/>
 					<div
 						className='mt-10
@@ -60,21 +65,27 @@ const Properties = () => {
                         2xl:grid-cols-6
                         '
 					>
-						{properties.map((property) => (
+						{reservations.map((reservation) => (
 							<ListingCard
-								key={property.id}
-								data={property}
+								key={reservation.id}
+								data={{
+									...reservation.listing,
+									start_date: reservation.start_date,
+									end_date: reservation.end_date,
+								}}
 								token={user.token}
-								onAction={handleDelete}
-								actionID={property.id}
-								actionLabel='Delete property'
+								onAction={handleCancel}
+								actionID={reservation.id}
+								actionLabel='Cancel renting'
+								isLoading={isLoading}
+								isReservation
 							/>
 						))}
 					</div>
 				</Fragment>
 			)}
-		</Container>
+		</WrapperContent>
 	);
 };
 
-export default Properties;
+export default ReservationsView;

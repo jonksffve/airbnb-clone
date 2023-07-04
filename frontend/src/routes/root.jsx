@@ -1,11 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom';
 import RootLayout from './layouts/RootLayout';
-import Index from '../../pages/Index';
-import ListingDetail from '../../pages/ListingDetail';
-import Trips from '../../pages/Trips';
-import Favorites from '../../pages/Favorites';
-import Reservations from '../../pages/Reservations';
-import Properties from '../../pages/Properties';
+import IndexView from '../../pages/IndexView';
+import ListingDetailView from '../../pages/ListingDetailView';
+import TripsView from '../../pages/TripsView';
+import FavoritesView from '../../pages/FavoritesView';
+import RentalsView from '../../pages/RentalsView';
+import PropertiesView from '../../pages/PropertiesView';
 
 export const router = createBrowserRouter([
 	{
@@ -14,27 +14,27 @@ export const router = createBrowserRouter([
 		children: [
 			{
 				index: true,
-				element: <Index />,
+				element: <IndexView />,
 			},
 			{
 				path: ':listingID',
-				element: <ListingDetail />,
+				element: <ListingDetailView />,
 			},
 			{
 				path: 'trips/',
-				element: <Trips />,
+				element: <TripsView />,
 			},
 			{
 				path: 'favorites/',
-				element: <Favorites />,
+				element: <FavoritesView />,
 			},
 			{
 				path: 'reservations/',
-				element: <Reservations />,
+				element: <RentalsView />,
 			},
 			{
 				path: 'properties/',
-				element: <Properties />,
+				element: <PropertiesView />,
 			},
 		],
 	},

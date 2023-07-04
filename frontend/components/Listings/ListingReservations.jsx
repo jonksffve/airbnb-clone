@@ -1,7 +1,7 @@
 import { differenceInCalendarDays } from 'date-fns';
 import CalendarComponent from '../UIhelpers/CalendarComponent';
 import { useCallback, useEffect, useState } from 'react';
-import Button from '../UIhelpers/Button';
+import Button from '../UIhelpers/Buttons/Button';
 import { eachDayOfInterval, add } from 'date-fns';
 import { createReservationAPI } from '../../api/AuthAPI';
 import { useNavigate } from 'react-router-dom';

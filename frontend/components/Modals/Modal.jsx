@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
-import Button from '../UIhelpers/Button';
+import Button from '../UIhelpers/Buttons/Button';
 
 const Modal = ({
 	isOpen,

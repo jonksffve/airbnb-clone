@@ -1,39 +1,39 @@
 import { Fragment, useCallback, useMemo, useState } from 'react';
-import Container from '../components/UIhelpers/Container';
+import Heading from '../components/Modals/Heading';
+import WrapperContent from '../components/UIhelpers/WrapperContent';
 import { useSelector } from 'react-redux';
 import {
 	deleteReservationAPI,
 	getListingReservationsAPI,
 } from '../api/AuthAPI';
-import Heading from '../components/Modals/Heading';
 import ListingCard from '../components/Listings/ListingCard';
+import { useNavigate } from 'react-router-dom';
 import Spinner from '../components/UIhelpers/Spinner';
 import IsEmpty from '../components/Listings/IsEmpty';
-import { useNavigate } from 'react-router-dom';
 
-const Reservations = () => {
-	const user = useSelector((state) => state.user);
-	const [reservations, setReservations] = useState([]);
+const TripsView = () => {
+	const [tripsData, setTripsData] = useState([]);
 	const [isLoading, setIsLoading] = useState(undefined);
 	const [isEmpty, setIsEmpty] = useState(undefined);
+	const user = useSelector((state) => state.user);
 	const navigate = useNavigate();
 
 	useMemo(async () => {
 		if (!user.token) return;
 		await getListingReservationsAPI(
 			user.token,
-			setReservations,
+			setTripsData,
 			setIsLoading,
-			undefined,
-			true
+			null,
+			null
 		).then(() => {
-			setIsEmpty(reservations.length === 0);
+			setIsEmpty(tripsData.length === 0);
 		});
-	}, [user.token, reservations.length]);
+	}, [user.token, tripsData.length]);
 
 	const handleCancel = useCallback(
-		async (id) => {
-			await deleteReservationAPI(id, user.token, true).then(() => {
+		async (reservationID) => {
+			await deleteReservationAPI(reservationID, user.token).then(() => {
 				navigate(0);
 			});
 		},
@@ -45,13 +45,13 @@ const Reservations = () => {
 	}
 
 	return (
-		<Container>
+		<WrapperContent>
 			{isLoading && <Spinner />}
 			{!isLoading && (
 				<Fragment>
 					<Heading
-						title='All reservations made on your properties'
-						subtitle='Check them out'
+						title='All your trips'
+						subtitle='Where you have been (and where you will be...)'
 					/>
 					<div
 						className='mt-10
@@ -65,27 +65,31 @@ const Reservations = () => {
                         2xl:grid-cols-6
                         '
 					>
-						{reservations.map((reservation) => (
+						{tripsData.map((trip) => (
 							<ListingCard
-								key={reservation.id}
+								key={trip.id}
 								data={{
-									...reservation.listing,
-									start_date: reservation.start_date,
-									end_date: reservation.end_date,
+									start_date: trip.start_date,
+									end_date: trip.end_date,
+									...trip.listing,
 								}}
 								token={user.token}
-								onAction={handleCancel}
-								actionID={reservation.id}
-								actionLabel='Cancel renting'
+								actionID={trip.id}
 								isLoading={isLoading}
+								onAction={
+									new Date(trip.end_date) < new Date()
+										? undefined
+										: handleCancel
+								}
+								actionLabel='Cancel reservation'
 								isReservation
 							/>
 						))}
 					</div>
 				</Fragment>
 			)}
-		</Container>
+		</WrapperContent>
 	);
 };
 
-export default Reservations;
+export default TripsView;

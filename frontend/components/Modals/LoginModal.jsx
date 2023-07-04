@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
-import Modal from '../UIhelpers/Modal';
+import Modal from './Modal';
 import { useDispatch, useSelector } from 'react-redux';
 import { uiActions } from '../../store/ui-slice';
 import { userActions } from '../../store/user-slice';
 import Input from '../UIhelpers/Inputs/Input';
 import Heading from './Heading';
 import { useForm } from 'react-hook-form';
-import Button from '../UIhelpers/Button';
+import Button from '../UIhelpers/Buttons/Button';
 import { FcGoogle } from 'react-icons/fc';
 import { AiFillGithub } from 'react-icons/ai';
 import { createAuthorizationAPI } from '../../api/AuthAPI';

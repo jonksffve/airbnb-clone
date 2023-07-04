@@ -72,7 +72,7 @@ const UserMenu = () => {
 									navigate(ROUTE_RESERVATIONS);
 									toggleOpen();
 								}}
-								label='My rentings'
+								label='My rentals'
 							/>
 							<MenuItem
 								onClick={() => {

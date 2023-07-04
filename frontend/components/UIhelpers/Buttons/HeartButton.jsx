@@ -1,5 +1,5 @@
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
-import { favoriteCreateDeleteAPI } from '../../api/AuthAPI';
+import { favoriteCreateDeleteAPI } from '../../../api/AuthAPI';
 import { useCallback, useEffect, useState } from 'react';
 
 const HeartButton = ({ liked, listingID, token }) => {

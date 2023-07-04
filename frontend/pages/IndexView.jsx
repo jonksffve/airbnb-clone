@@ -2,13 +2,13 @@ import { Fragment, useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getListingAPI } from '../api/AuthAPI';
 import { useSelector } from 'react-redux';
-import Container from '../components/UIhelpers/Container';
+import WrapperContent from '../components/UIhelpers/WrapperContent';
 import IsEmpty from '../components/Listings/IsEmpty';
 import ListingCard from '../components/Listings/ListingCard';
 import Spinner from '../components/UIhelpers/Spinner';
 import Categories from '../components/Menu/Categories';
 
-const Index = () => {
+const IndexView = () => {
 	const user = useSelector((state) => state.user);
 	const [listings, setListings] = useState([]);
 	const [isLoading, setIsLoading] = useState(undefined);
@@ -38,7 +38,7 @@ const Index = () => {
 			<div className='mb-5 w-full bg-white shadow-sm'>
 				<Categories />
 			</div>
-			<Container>
+			<WrapperContent>
 				{isLoading && <Spinner />}
 				{!isLoading && (
 					<div
@@ -60,9 +60,9 @@ const Index = () => {
 						))}
 					</div>
 				)}
-			</Container>
+			</WrapperContent>
 		</Fragment>
 	);
 };
 
-export default Index;
+export default IndexView;

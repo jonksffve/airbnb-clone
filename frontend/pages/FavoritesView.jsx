@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from 'react';
-import Container from '../components/UIhelpers/Container';
+import WrapperContent from '../components/UIhelpers/WrapperContent';
 import Heading from '../components/Modals/Heading';
 import IsEmpty from '../components/Listings/IsEmpty';
 import ListingCard from '../components/Listings/ListingCard';
@@ -7,7 +7,7 @@ import { getFavoritesAPI } from '../api/AuthAPI';
 import { useSelector } from 'react-redux';
 import Spinner from '../components/UIhelpers/Spinner';
 
-const Favorites = () => {
+const FavoritesView = () => {
 	const user = useSelector((state) => state.user);
 	const [favorites, setFavorites] = useState([]);
 	const [isLoading, setIsLoading] = useState(undefined);
@@ -23,7 +23,7 @@ const Favorites = () => {
 	}
 
 	return (
-		<Container>
+		<WrapperContent>
 			{isLoading && <Spinner />}
 			{!isLoading && (
 				<Fragment>
@@ -53,8 +53,8 @@ const Favorites = () => {
 					</div>
 				</Fragment>
 			)}
-		</Container>
+		</WrapperContent>
 	);
 };
 
-export default Favorites;
+export default FavoritesView;
