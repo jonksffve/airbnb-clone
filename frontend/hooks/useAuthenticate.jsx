@@ -10,9 +10,9 @@ export const useAuthenticate = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		if (!user.token) {
-			navigate(ROUTE_HOME);
-			dispatch(uiActions.showLoginModal());
-		}
+		const token = localStorage.getItem('auth_token');
+		if (token) return;
+		navigate(ROUTE_HOME);
+		dispatch(uiActions.showLoginModal());
 	}, [dispatch, user.token, navigate]);
 };
