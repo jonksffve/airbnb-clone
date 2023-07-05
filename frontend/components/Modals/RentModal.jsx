@@ -1,7 +1,7 @@
 import Modal from './Modal';
 import { useDispatch, useSelector } from 'react-redux';
 import { uiActions } from '../../store/ui-slice';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Heading from './Heading';
 import CategoryInput from '../UIhelpers/Inputs/CategoryInput';
 import { useForm } from 'react-hook-form';
@@ -64,41 +64,47 @@ const RentModal = () => {
 	const bathroomCount = watch('bathroomCount');
 	const image = watch('image');
 
-	const setCustomValue = (id, value) => {
-		setValue(id, value, {
-			shouldDirty: true,
-			shouldTouch: true,
-			shouldValidate: true,
-		});
-	};
+	const setCustomValue = useCallback(
+		(id, value) => {
+			setValue(id, value, {
+				shouldDirty: true,
+				shouldTouch: true,
+				shouldValidate: true,
+			});
+		},
+		[setValue]
+	);
 
-	const onBack = () => {
+	const onBack = useCallback(() => {
 		setStep((value) => value - 1);
-	};
+	}, []);
 
-	const onNext = () => {
+	const onNext = useCallback(() => {
 		setStep((value) => value + 1);
-	};
+	}, []);
 
-	const onSubmit = async (data) => {
-		if (step !== STEPS.PRICE) return onNext();
-		const response = await createListingAPI(
-			data,
-			setIsLoading,
-			userState.token
-		);
+	const onSubmit = useCallback(
+		async (data) => {
+			if (step !== STEPS.PRICE) return onNext();
+			const response = await createListingAPI(
+				data,
+				setIsLoading,
+				userState.token
+			);
 
-		if (response.status === 201) {
-			reset();
-			dispatch(uiActions.closeRentModal());
-			setStep(STEPS.CATEGORY);
-			navigate(ROUTE_HOME);
-		}
-	};
+			if (response.status === 201) {
+				reset();
+				dispatch(uiActions.closeRentModal());
+				setStep(STEPS.CATEGORY);
+				navigate(ROUTE_HOME);
+			}
+		},
+		[dispatch, navigate, reset, step, userState.token, onNext]
+	);
 
-	const handleClose = () => {
+	const handleClose = useCallback(() => {
 		dispatch(uiActions.closeRentModal());
-	};
+	}, [dispatch]);
 
 	const actionLabel = useMemo(() => {
 		if (step === STEPS.PRICE) return 'Create';
