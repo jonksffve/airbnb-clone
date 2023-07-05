@@ -7,6 +7,7 @@ This is a project used for learning purposes. Goal was to build an airbnb-like s
 Project follows a typical Django project structure with the frontend built using React. Main technologies and components:
 
 backend: Directory that contains the **Django** project setup, configuration files, including the settings, URL routing, database models and **Django Rest Framework**, support files such as views and endpoint urls.
+
 frontend: This directory contains the **React** application code, including the components, styles **(made with Tailwind css)**, and assets. Frontend was built with the help of Vite, React router, React redux among other useful tools.
 
 ## Installation
