@@ -8,9 +8,12 @@ import { useDispatch } from 'react-redux';
 import { userActions } from '../../../store/user-slice';
 import RentModal from '../../../components/Modals/RentModal';
 import SearchModal from '../../../components/Modals/SearchModal';
+import { useAuthenticate } from '../../../hooks/useAuthenticate';
 
 const RootLayout = () => {
 	const dispatch = useDispatch();
+
+	useAuthenticate();
 
 	useMemo(async () => {
 		const token = localStorage.getItem('auth_token');

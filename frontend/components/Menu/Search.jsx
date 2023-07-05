@@ -1,12 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 import { BiSearch } from 'react-icons/bi';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { uiActions } from '../../store/ui-slice';
 import { useSearchParams } from 'react-router-dom';
 import { getByValue } from '../../hooks/WorldCountries';
 import { differenceInDays } from 'date-fns';
 
 const Search = () => {
+	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 	const handleSearch = useCallback(() => {
 		dispatch(uiActions.showSearchModal());
@@ -54,8 +55,16 @@ const Search = () => {
 
 	return (
 		<div
-			className='w-full cursor-pointer rounded-full border-[1px] py-2 shadow-sm transition hover:shadow-md md:w-auto'
-			onClick={handleSearch}
+			className={`w-full 
+			${user.token ? 'cursor-pointer' : 'cursor-not-allowed'}
+			rounded-full 
+			border-[1px] 
+			py-2 
+			shadow-sm 
+			transition 
+			hover:shadow-md 
+			md:w-auto`}
+			onClick={user.token && handleSearch}
 		>
 			<div className='flex flex-row items-center justify-between'>
 				<div className='px-6 text-sm font-semibold'>{where}</div>

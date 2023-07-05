@@ -8,7 +8,6 @@ import { userActions } from '../../store/user-slice';
 import { useNavigate } from 'react-router-dom';
 import {
 	ROUTE_FAVORITES,
-	ROUTE_HOME,
 	ROUTE_PROPERTIES,
 	ROUTE_RESERVATIONS,
 	ROUTE_TRIPS,
@@ -94,7 +93,7 @@ const UserMenu = () => {
 									localStorage.removeItem('auth_token');
 									dispatch(userActions.logoutUser());
 									toggleOpen();
-									navigate(ROUTE_HOME);
+									navigate(0);
 								}}
 								label='Log out'
 							/>
