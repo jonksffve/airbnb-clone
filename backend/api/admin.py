@@ -3,7 +3,7 @@ from .models import Category, Listing, FavoriteListing, ReservationListing
 
 
 class ListingAdmin(admin.ModelAdmin):
-    list_display = ['title', 'creator', 'id']
+    list_display = ["title", "creator", "id", "location"]
 
 
 admin.site.register(Category)
