@@ -13,18 +13,18 @@ frontend: This directory contains the **React** application code, including the 
 ## Installation
 To run this project locally, follow these steps:
 
-## Backend Setup
+### Backend Setup
 - Clone the repository.
 - Navigate to the backend directory: cd backend
 - Create a virtual environment: python -m venv venv
 - Activate the virtual environment:
-- For Windows: venv\Scripts\activate
-- For Unix or Linux: source venv/bin/activate
+  - For Windows: venv\Scripts\activate
+  - For Unix or Linux: source venv/bin/activate
 - Install the required Python packages: pip install -r requirements.txt
 - Apply database migrations: python manage.py migrate
 - Start the backend server: python manage.py runserver
 
-## Frontend Setup
+### Frontend Setup
 - Open a new terminal window/tab.
 - Navigate to the frontend directory: cd frontend
 - Install the required Node packages: npm install
