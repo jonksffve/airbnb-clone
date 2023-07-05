@@ -14,7 +14,7 @@ frontend: This directory contains the **React** application code, including the 
 To run this project locally, follow these steps:
 
 ## Backend Setup
-- Clone the repository: git clone <repository_url>
+- Clone the repository.
 - Navigate to the backend directory: cd backend
 - Create a virtual environment: python -m venv venv
 - Activate the virtual environment:
