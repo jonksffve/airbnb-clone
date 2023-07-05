@@ -372,10 +372,14 @@ class AccountTests(TestSetUp):
 
         @ Returns:
             200 - When everything went good and returns list
+                - Returns (via query_params) either:
+                    - All listings (no query_params given)
+                    - Listings owned by request.user (Properties)
+                    - Listings filtered down (location, guestCount, roomCount, bathroomCount, dateRange)
             201 - On succesful creation
             400 - Something went wrong validating data for creation
             401 - Unauthorized
-            404 - Whatever you try to list was not found
+            404 - Whatever you try to list was not found or category not found
         """
         # Creating listings (valid data)
         response = self.client.post(
@@ -410,12 +414,61 @@ class AccountTests(TestSetUp):
         self.assertEqual(len(response_second_user.data), 4)
 
         # Theres only 1 listing created in setup (owned by first_user_obj)
-        # GET method should return [1] with "user_only params"
+        # GET method should return [2] with "user_only params" since in tests we create 1 aswell
         response = self.client.get(
             f"{self.listing_endpoint}?user_only",
             HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}',
         )
         self.assertEqual(len(response.data), 2)
+
+        # GET with category
+        response = self.client.get(
+            f"{self.listing_endpoint}?user_only",
+            HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}',
+        )
+        self.assertEqual(len(response.data), 2)
+
+        # GET with unknown category
+        response = self.client.get(
+            f"{self.listing_endpoint}?category=3141",
+            HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}',
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # GET with location
+        response = self.client.get(
+            f"{self.listing_endpoint}?location=US",
+            HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}',
+        )
+        self.assertEqual(len(response.data), 1)
+
+        # GET with unknown location
+        response = self.client.get(
+            f"{self.listing_endpoint}?location=2UNKNOWN",
+            HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}',
+        )
+        self.assertEqual(len(response.data), 0)
+
+        # GET with guestCount
+        response = self.client.get(
+            f"{self.listing_endpoint}?guestCount=2",
+            HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}',
+        )
+        self.assertEqual(len(response.data), 4)
+
+        # GET with negative guestCount
+        response = self.client.get(
+            f"{self.listing_endpoint}?guestCount=-2",
+            HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}',
+        )
+        self.assertEqual(len(response.data), 4)
+
+        # GET with string guestCount
+        response = self.client.get(
+            f"{self.listing_endpoint}?guestCount=hola",
+            HTTP_AUTHORIZATION=f'Token {self.authenticated_user["token"]}',
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Testing situations in which we can't create
         # With empty title

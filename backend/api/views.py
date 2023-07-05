@@ -26,6 +26,7 @@ from .serializers import (
 from .models import Listing, Category, FavoriteListing, ReservationListing
 
 from django.utils.timezone import now
+from django.utils.dateparse import parse_datetime
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
@@ -184,9 +185,10 @@ class ListingCreateListView(ListCreateAPIView):
 
     Returns:
         200 - When everything went good and returns list
-            - Either returns (via query_params):
+            - Returns (via query_params) either:
+                - All listings (no query_params given)
                 - Listings owned by request.user (Properties)
-                - All listings
+                - Listings filtered down (location, guestCount, roomCount, bathroomCount, dateRange)
         201 - On succesful creation
         400 - Something went wrong validating data for creation
         401 - Unauthorized
@@ -198,9 +200,81 @@ class ListingCreateListView(ListCreateAPIView):
     serializer_class = ListingSerializer
 
     def get_queryset(self):
-        if "user_only" in self.request.query_params:
-            return Listing.objects.filter(creator=self.request.user)
-        return Listing.objects.all()
+        # Initially we get all objects that *might* get filtered down
+        queryset = Listing.objects.all()
+
+        # If we got query_params we FILTER
+        if len(self.request.query_params) > 0:
+            # base case breaks the filtering
+            if "user_only" in self.request.query_params:
+                return queryset.filter(creator=self.request.user)
+
+            # index page query_params filtering
+            # category
+            if "category" in self.request.query_params:
+                query_category = get_object_or_404(
+                    Category, name=self.request.query_params["category"]
+                )
+                queryset = queryset.filter(category=query_category)
+
+            # location
+            if "location" in self.request.query_params:
+                queryset = queryset.filter(
+                    location=self.request.query_params["location"]
+                )
+
+            # guestCount
+            if "guestCount" in self.request.query_params:
+                try:
+                    queryset = queryset.filter(
+                        guestCount__gte=self.request.query_params["guestCount"]
+                    )
+                except:
+                    raise ParseError
+
+            # roomCount
+            if "roomCount" in self.request.query_params:
+                try:
+                    queryset = queryset.filter(
+                        roomCount__gte=self.request.query_params["roomCount"]
+                    )
+                except:
+                    raise ParseError
+            # bathroomCount
+            if "bathroomCount" in self.request.query_params:
+                try:
+                    queryset = queryset.filter(
+                        bathroomCount__gte=self.request.query_params["bathroomCount"]
+                    )
+                except:
+                    raise ParseError
+
+            # startDate - # endDate
+            if ("startDate" in self.request.query_params) and (
+                "endDate" in self.request.query_params
+            ):
+                start_date = parse_datetime(self.request.query_params["startDate"])
+                end_date = parse_datetime(self.request.query_params["endDate"])
+
+                # Currently active reservations overall
+                active_reservations = ReservationListing.objects.filter(
+                    end_date__gte=now()
+                )
+
+                # Active reservations BOOKED in the given range of dates
+                # Return: List of listings IDs, that have been booked in this time
+                active_reservations = active_reservations.filter(
+                    start_date__lte=end_date.date(), end_date__gte=start_date.date()
+                ).values_list("listing", flat=True)
+
+                # Exclude from the main queryset the booked IDs
+                queryset = queryset.exclude(id__in=active_reservations)
+
+            # filters applied
+            return queryset
+
+        # No filters were applied (no query_params given)
+        return queryset
 
     def create(self, request, *args, **kwargs):
         # raises 400 if not given category in the body
