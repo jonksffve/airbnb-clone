@@ -4,6 +4,7 @@ const initialState = {
 	showRegisterModal: false,
 	showLoginModal: false,
 	showRentModal: false,
+	showSearchModal: false,
 };
 
 const uiSlice = createSlice({
@@ -27,6 +28,12 @@ const uiSlice = createSlice({
 		},
 		closeRentModal: (state) => {
 			state.showRentModal = false;
+		},
+		showSearchModal: (state) => {
+			state.showSearchModal = true;
+		},
+		closeSearchModal: (state) => {
+			state.showSearchModal = false;
 		},
 	},
 });
