@@ -21,23 +21,26 @@ const IndexView = () => {
 
 	useMemo(async () => {
 		if (!user.token) return;
-		await getListingAPI(user.token, setListings, setIsLoading, setIsEmpty);
-	}, [user.token]);
-
-	if (isEmpty) {
-		return (
-			<IsEmpty
-				onClick={handleReset}
-				showReset={searchParams.size !== 0}
-			/>
+		await getListingAPI(
+			user.token,
+			setListings,
+			setIsLoading,
+			setIsEmpty,
+			searchParams
 		);
-	}
+	}, [user.token, searchParams]);
 
 	return (
 		<Fragment>
 			<div className='mb-5 w-full bg-white shadow-sm'>
 				<Categories />
 			</div>
+			{isEmpty && (
+				<IsEmpty
+					onClick={handleReset}
+					showReset={searchParams.size !== 0}
+				/>
+			)}
 			<WrapperContent>
 				{isLoading && <Spinner />}
 				{!isLoading && (

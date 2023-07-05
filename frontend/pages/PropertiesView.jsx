@@ -22,7 +22,7 @@ const PropertiesView = () => {
 			setProperties,
 			setIsLoading,
 			setIsEmpty,
-			true
+			new URLSearchParams('user_only')
 		);
 	}, [user.token]);
 

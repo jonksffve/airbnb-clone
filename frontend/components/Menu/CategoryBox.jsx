@@ -7,13 +7,11 @@ const CategoryBox = ({ icon: Icon, label, selected }) => {
 	const handleClick = useCallback(() => {
 		if (searchParams.get('category') === label) {
 			searchParams.delete('category');
-			setSearchParams({ ...searchParams });
-			return;
 		}
 
-		setSearchParams({
-			...searchParams,
-			category: label,
+		setSearchParams((prevState) => {
+			prevState.set('category', label);
+			return prevState;
 		});
 	}, [label, setSearchParams, searchParams]);
 

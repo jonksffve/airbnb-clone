@@ -125,8 +125,8 @@ export const getListingAPI = async (
 
 		let url = ENDPOINT_LISTING;
 
-		if (params) {
-			url += '?user_only';
+		if (params.size !== 0) {
+			url += `?${params.toString()}`;
 		}
 
 		const response = await axios.get(url, {
@@ -134,6 +134,7 @@ export const getListingAPI = async (
 				Authorization: `Token ${token}`,
 			},
 		});
+
 		setData(response.data);
 		setIsEmpty(response.data.length === 0);
 	} catch (error) {
