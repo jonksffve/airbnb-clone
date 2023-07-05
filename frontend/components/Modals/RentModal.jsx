@@ -86,18 +86,12 @@ const RentModal = () => {
 	const onSubmit = useCallback(
 		async (data) => {
 			if (step !== STEPS.PRICE) return onNext();
-			const response = await createListingAPI(
-				data,
-				setIsLoading,
-				userState.token
-			);
-
-			if (response.status === 201) {
+			await createListingAPI(data, setIsLoading, userState.token).then(() => {
 				reset();
 				dispatch(uiActions.closeRentModal());
 				setStep(STEPS.CATEGORY);
-				navigate(ROUTE_HOME);
-			}
+				navigate(0);
+			});
 		},
 		[dispatch, navigate, reset, step, userState.token, onNext]
 	);

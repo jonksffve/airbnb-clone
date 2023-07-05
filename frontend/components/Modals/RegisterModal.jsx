@@ -37,18 +37,17 @@ const RegisterModal = () => {
 
 	const onSubmit = useCallback(
 		async (data) => {
-			const response = await createNewUserAPI(data, setIsLoading);
-
-			if (response.status === 400) {
-				const errors = Object.entries(response.data);
-				for (const [key, value] of errors) {
-					setError(key, { type: 'custom', message: [...value] });
-				}
-			}
-
-			if (response.status === 201) {
-				handleClose();
-			}
+			await createNewUserAPI(data, setIsLoading)
+				.then((response) => {
+					console.log(response);
+					handleClose();
+				})
+				.catch((err) => {
+					const errors = Object.entries(err.data);
+					for (const [key, value] of errors) {
+						setError(key, { type: 'custom', message: [...value] });
+					}
+				});
 		},
 		[handleClose, setError]
 	);

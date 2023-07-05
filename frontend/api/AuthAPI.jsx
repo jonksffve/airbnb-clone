@@ -11,63 +11,98 @@ import {
 
 //? CRUD HELPER FUNCTIONS
 
-//* CREATE
+//* CREATE [POST] REQUESTS
+
+/**
+ * Function that tries to create a newuser in the backend.
+ *
+ * @async
+ * @param {object} data - Data payload to be sent.
+ * @param {function(boolean):void} setIsLoading - Callback that will set the component's loading state.
+ * @returns Returns response object that contains user object information and extras**
+ * @throws Will throw error messages if it fails.
+ */
 export const createNewUserAPI = async (data, setIsLoading) => {
 	try {
 		setIsLoading(true);
-		const response = await axios.post(ENDPOINT_ACCOUNT, data, {
-			withCredentials: false,
-		});
+		const response = await axios.post(ENDPOINT_ACCOUNT, data);
 		toast.success('User created', toastOptions);
 		return response;
 	} catch (error) {
-		toast.error('Something happened', toastOptions);
-		return error.response;
+		if (error.response.data) {
+			for (const err in error.response.data) {
+				toast.error(`${err}: ${error.response.data[err]}`, toastOptions);
+			}
+		}
+		throw error.response;
 	} finally {
 		setIsLoading(false);
 	}
 };
 
+/**
+ * Function that tries to create token authotization in the backend.
+ *
+ * @async
+ * @param {object} data - Data payload to be sent.
+ * @param {function(boolean):void} setIsLoading - Callback that will set the component's loading state.
+ * @returns Returns response object with authenticated user object information and extras**
+ * @throws Will throw error messages if it fails.
+ */
 export const createAuthorizationAPI = async (data, setIsLoading) => {
 	try {
 		setIsLoading(true);
-		const response = await axios.post(ENDPOINT_AUTH, data, {
-			withCredentials: false,
-		});
+		const response = await axios.post(ENDPOINT_AUTH, data);
 		toast.success('User logged in', toastOptions);
 		return response;
 	} catch (error) {
-		toast.error('Please check credentials.', toastOptions);
-		return error.response;
+		toast.error('Could not login. Please check credentials.', toastOptions);
+		throw error.response;
 	} finally {
 		setIsLoading(false);
 	}
 };
 
+/**
+ * Function that tries to create a Listing instance object.
+ *
+ * @async
+ * @param {object} data - Data payload to be sent.
+ * @param {function(boolean):void} setIsLoading - Callback that will set the component's loading state.
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @throws Response: with error messages if it fails.
+ */
 export const createListingAPI = async (data, setIsLoading, token) => {
 	try {
 		setIsLoading(true);
-		const response = await axios.postForm(ENDPOINT_LISTING, data, {
-			withCredentials: false,
+		await axios.postForm(ENDPOINT_LISTING, data, {
 			headers: {
 				'content-type': 'multipart/form-data',
 				Authorization: `Token ${token}`,
 			},
 		});
 		toast.success('Listing created!', toastOptions);
-		return response;
 	} catch (error) {
 		if (error.response.data) {
 			for (const err in error.response.data) {
-				toast.error(`Please check: ${err}`, toastOptions);
+				toast.error(`${err}: ${error.response.data[err]}`, toastOptions);
 			}
 		}
-		return error.response;
+		throw error.response;
 	} finally {
 		setIsLoading(false);
 	}
 };
 
+/**
+ * Function that tries to create a Reservation instance object on a selected listing.
+ *
+ * @async
+ * @param {string} listingID - ID of the selected listing we're attempting to reservate.
+ * @param {object} dateRange - Object containing startdate and endingdate.
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @param {function(boolean):void} setIsReservating - Callback that will set the component's state.
+ */
 export const createReservationAPI = async (
 	listingID,
 	dateRange,
@@ -91,14 +126,22 @@ export const createReservationAPI = async (
 		);
 		toast.success('Reservation is made!', toastOptions);
 	} catch (error) {
-		console.log(error);
 		toast.error('Could not create reservation', toastOptions);
 	} finally {
 		setIsReservating(false);
 	}
 };
 
-//* READ
+//* READ [GET] REQUESTS
+
+/**
+ * Function that tries to get user information based on a provided token.
+ *
+ * @async
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @returns Response object that contains the authenticated user information.
+ * @throws Response object that contains error messages if it fails.
+ */
 export const getUserInformationAPI = async (token) => {
 	try {
 		const response = await axios.get(`${ENDPOINT_ACCOUNT}${token}/`, {
@@ -109,10 +152,20 @@ export const getUserInformationAPI = async (token) => {
 		return response;
 	} catch (error) {
 		toast.error('Please check credentials.', toastOptions);
-		return error.response;
+		throw error.response;
 	}
 };
 
+/**
+ * Function that tries to retrieve a list of listing instances.
+ *
+ * @async
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @param {function(Array):void} setData - Callback that sets component's data list state.
+ * @param {function(boolean):void} setIsLoading - Callback to set component's loading state.
+ * @param {function(boolean):void} setIsEmpty - Callback to set component's data display state.
+ * @param {URLSearchParams} [params = false] - URLSearchParams to let the backend know how to filter data is optional.
+ */
 export const getListingAPI = async (
 	token,
 	setData,
@@ -146,6 +199,14 @@ export const getListingAPI = async (
 	}
 };
 
+/**
+ * Function that tries to retrieve information of a particular Listing instance.
+ *
+ * @async
+ * @param {string} listingID - String value that represents the ID of a particular listing
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @param {function(Array):void} setListing - Callback that will set component's data state.
+ */
 export const getListingInformationAPI = async (
 	listingID,
 	token,
@@ -159,10 +220,22 @@ export const getListingInformationAPI = async (
 		});
 		setListing(response.data);
 	} catch (error) {
-		toast.error('Something very wrong happened!', toastOptions);
+		toast.error('Something went wrong!', toastOptions);
 	}
 };
 
+/**
+ * Function that tries to get reservations made on a particular listing
+ * OR
+ * Tries to get reservations made on ALL properties of the currently logged-in user
+ *
+ * @async
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @param {function(Array):void} setData - Callback that sets the component's data information on successful fetching.
+ * @param {function(boolean)} setIsLoading - Callback that sets the component's loading state.
+ * @param {string} [listingID = undefined] - ID of a particular listing. This is optional.
+ * @param {boolean} [user_properties = undefined] - Boolean to fetch currently logged-in user properties' reservations. This is optional.
+ */
 export const getListingReservationsAPI = async (
 	token,
 	setData,
@@ -197,6 +270,16 @@ export const getListingReservationsAPI = async (
 	}
 };
 
+/**
+ * Function that tries to get Favorite instances corresponding to the logged-in user
+ * (All listings that the user has favorited)
+ *
+ * @async
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @param {function(Array):void} setFavorites - Callback that will set the component's information state.
+ * @param {function(boolean):void} setIsLoading - Callback that sets the component's loading state.
+ * @param {function(boolean):void} setIsEmpty - Callback that sets the emptiness of the backend response.
+ */
 export const getFavoritesAPI = async (
 	token,
 	setFavorites,
@@ -223,8 +306,17 @@ export const getFavoritesAPI = async (
 
 //* UPDATE
 
-//* CREATE - DELETE
+//* CREATE - DELETE: functions that either perform [POST] or [DELETE] requests
 
+/**
+ * Function that creates or deletes favorite instances. Based on present "like" state.
+ *
+ * @async
+ * @param {string} listingID - String value that represents a particular listing.
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @param {boolean} liked - Boolean value for which we determine weather to CREATE or DELETE a favorite instance.
+ * @param {function(boolean):void} setLikeState - Callback that toggles the component's like state.
+ */
 export const favoriteCreateDeleteAPI = async (
 	listingID,
 	token,
@@ -251,7 +343,6 @@ export const favoriteCreateDeleteAPI = async (
 				}
 			);
 		}
-		//We toggle state
 		setLikeState(!liked);
 	} catch (error) {
 		toast.error('Something happened.', toastOptions);
@@ -259,6 +350,18 @@ export const favoriteCreateDeleteAPI = async (
 };
 
 //* DELETE
+
+/**
+ * Function that deletes a reservation instance.
+ * Can be deleted by user that made it.
+ * OR
+ * Can be deleted by owner of the property.
+ *
+ * @async
+ * @param {string} reservationID - ID String that represents the reservation.
+ * @param {string} token - String value that represents the authorization of a given user.
+ * @param {boolean} params - Boolean value to determine who is trying to delete the reservation. (User or Property owner)
+ */
 export const deleteReservationAPI = async (
 	reservationID,
 	token,
@@ -285,6 +388,13 @@ export const deleteReservationAPI = async (
 	}
 };
 
+/**
+ * Function to delete listing instances.
+ *
+ * @async
+ * @param {string} listingID - String value that represents the listing.
+ * @param {string} token - String value that represents the authorization of a given user.
+ */
 export const deleteListingAPI = async (listingID, token) => {
 	try {
 		await axios.delete(`${ENDPOINT_LISTING}${listingID}/`, {

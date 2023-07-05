@@ -92,10 +92,21 @@ const categories = [
 	},
 ];
 
+/**
+ * Function that returns all available categories.
+ *
+ * @returns {Array} An array of Category objects.
+ */
 export const getCategories = () => {
 	return categories;
 };
 
+/**
+ * Function that queries for a particular category
+ *
+ * @param {string} value - Name of the category
+ * @returns {Object} Returns an object with all the category information.
+ */
 export const getCategory = (value) => {
 	return categories.find((item) => item.label == value);
 };
